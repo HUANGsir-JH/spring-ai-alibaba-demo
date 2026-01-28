@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: SAADemoApp
+
+  ai:
+    dashscope:
+      api-key: sk-b3458569b7bd45708834fdfc06210519
+
+apikey:
+  qwenKey: sk-b3458569b7bd45708834fdfc06210519
+
+
+server:
+    port: 8888
