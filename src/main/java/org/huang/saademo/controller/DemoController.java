@@ -1,5 +1,6 @@
 package org.huang.saademo.controller;
 
+import com.alibaba.cloud.ai.graph.exception.GraphRunnerException;
 import jakarta.annotation.Resource;
 import lombok.Getter;
 import org.huang.saademo.service.DemoAgent;
@@ -12,7 +13,7 @@ public class DemoController {
     private DemoAgent demoAgent;
     
     @GetMapping("/weather")
-    public String getWeatherInfo(@RequestParam String city) {
+    public String getWeatherInfo(@RequestParam String city) throws GraphRunnerException {
         if(city == null || city.trim().isEmpty()) {
             return "City name cannot be empty.";
         }
