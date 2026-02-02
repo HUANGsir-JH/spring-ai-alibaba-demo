@@ -6,10 +6,12 @@ import com.alibaba.cloud.ai.graph.agent.ReactAgent;
 import com.alibaba.cloud.ai.graph.exception.GraphRunnerException;
 import jakarta.annotation.Resource;
 import org.huang.saademo.service.DemoAgent;
+import org.huang.saademo.service.StreamAgent;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +23,9 @@ class SaaDemoApplicationTests {
     
     @Resource
     private DemoAgent demoAgent;
+    
+    @Resource
+    private StreamAgent streamAgent;
     
     @Test
     void contextLoads() {
@@ -76,4 +81,7 @@ class SaaDemoApplicationTests {
         System.out.println("Final Agent Response: " + response);
     }
 
+    
+    
+    
 }

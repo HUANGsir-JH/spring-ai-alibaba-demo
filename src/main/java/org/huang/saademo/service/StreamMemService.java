@@ -7,14 +7,19 @@ import com.alibaba.cloud.ai.graph.NodeOutput;
 import com.alibaba.cloud.ai.graph.RunnableConfig;
 import com.alibaba.cloud.ai.graph.agent.ReactAgent;
 import com.alibaba.cloud.ai.graph.checkpoint.savers.MemorySaver;
-import com.alibaba.cloud.ai.graph.exception.GraphRunnerException;
+import com.alibaba.cloud.ai.graph.checkpoint.savers.redis.RedisSaver;
 import com.alibaba.cloud.ai.graph.streaming.OutputType;
 import com.alibaba.cloud.ai.graph.streaming.StreamingOutput;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.huang.saademo.config.ApiKeyConfig;
+import org.huang.saademo.hook.TimeRecordAgentHook;
+import org.huang.saademo.interceptor.TimeRecordModelInterceptor;
+import org.huang.saademo.interceptor.ToolRecordInterceptor;
 import org.huang.saademo.tools.TimeTool;
 import org.huang.saademo.tools.WeatherSearchTool;
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -22,11 +27,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.publisher.Flux;
 
-import java.util.Optional;
 
 @Service
 @Slf4j
-public class StreamAgent {
+public class StreamMemService {
     
     @Resource
     private ApiKeyConfig apiKeyConfig;
@@ -36,51 +40,72 @@ public class StreamAgent {
     
     private static final String MODEL_NAME = "qwen3-max-2026-01-23";
     
-    public void StreamCall(SseEmitter emitter, String prompt) {
+    @Resource(name="redissonClient")
+    private RedissonClient redissonClient;
+    
+    @Resource
+    private TimeRecordAgentHook timeRecordAgentHook;
+    
+    @Resource
+    private TimeRecordModelInterceptor timeRecordModelInterceptor;
+    
+    @Resource
+    private ToolRecordInterceptor toolRecordInterceptor;
+    
+    public void streamCall(SseEmitter emitter, String prompt) {
         ReactAgent agent = createAgent();
         
-        RunnableConfig config = RunnableConfig
-                .builder().addMetadata("user_id", "hjh").build();
+        RunnableConfig config = RunnableConfig.builder()
+                .threadId("thread-1")
+                .addMetadata("user_id", "hjh")
+                .build();
         
         try{
             executor.submit(()->{
-                try {
+                try{
                     Flux<NodeOutput> stream = agent.stream(prompt, config);
-                    stream.subscribe(output->{
-                        if(output instanceof StreamingOutput streamingOutput){
-                            OutputType type = streamingOutput.getOutputType();
-                            Message message = streamingOutput.message();
+                    stream.subscribe(output ->{
+                        if(output instanceof StreamingOutput modelResponse){
+                            OutputType type = modelResponse.getOutputType();
+                            Message message = modelResponse.message();
                             
-                            if(type == OutputType.AGENT_MODEL_STREAMING){
-                                sendEvent(emitter, "[MODEL]", message.getText());
-                            } else if(type == OutputType.AGENT_MODEL_FINISHED) {
-                                sendEvent(emitter,"[Done]", "Agent processing completed.");
-                                emitter.complete();
-                            }
-                            
-                            if(type == OutputType.AGENT_TOOL_FINISHED) {
-                                if(message instanceof ToolResponseMessage toolResponse){
-                                    toolResponse.getResponses().forEach(response->{
-                                        sendEvent(emitter, "[Tool Result]", response.name() + ": " + response.responseData());
-                                    });
+                            switch (type){
+                                case AGENT_MODEL_STREAMING -> sendEvent(emitter, "[MODEL]", message.getText());
+                                case AGENT_MODEL_FINISHED -> {
+                                    sendEvent(emitter, "[Done]", "Agent processing completed.");
+                                    emitter.complete();
+                                }
+                                case AGENT_TOOL_STREAMING -> log.info("Tool streaming: {}", message.toString());
+                                case AGENT_TOOL_FINISHED -> {
+                                    if(message instanceof ToolResponseMessage tool){
+                                        tool.getResponses().forEach(response->{
+                                            String toolOutput = "id: "+response.id()+", name: "+response.name()+", data: "+ response.responseData();
+                                            sendEvent(emitter, "[TOOL]", toolOutput);
+                                        });
+                                    }
                                 }
                             }
                         }
-                    },error ->{
-                        log.error("Error in streaming", error);
+                    }, error ->{
+                        log.error("Error in streaming: ", error);
+                        sendEvent(emitter, "[Error]", "An error occurred: " + error.getMessage());
                         emitter.completeWithError(error);
-                    },()->{
-                        sendEvent(emitter, "[Complete]", "Streaming finished.");
+                    }, ()->{
+                        sendEvent(emitter, "[Complete]", "AI Streaming completed.");
                         emitter.complete();
                     });
-                } catch (GraphRunnerException e) {
+                }catch (Exception e){
+                    log.error("Error during streaming call", e);
+                    sendEvent(emitter, "[Error]", "An error occurred: " + e.getMessage());
                     emitter.completeWithError(e);
                 }
             });
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Error submitting task to executor", e);
+            sendEvent(emitter, "[Error]", "An error occurred: " + e.getMessage());
             emitter.completeWithError(e);
         }
+        
     }
     
     private ReactAgent createAgent(){
@@ -90,11 +115,18 @@ public class StreamAgent {
         
         DashScopeChatModel chatModel = DashScopeChatModel.builder().dashScopeApi(api).defaultOptions(options).build();
         
+        // 使用RedisSaver作为存储器
+        RedisSaver redisSaver = RedisSaver.builder()
+                .redisson(redissonClient).build();
+        
         ReactAgent agent = ReactAgent.builder()
                 .name("chat-agent")
                 .model(chatModel)
+                .hooks(timeRecordAgentHook)
+                .systemPrompt("你是一个乐于助人的智能助理，请根据用户的提问提供准确且有帮助的回答。")
+                .interceptors(timeRecordModelInterceptor,toolRecordInterceptor)
                 .methodTools(new TimeTool(), new WeatherSearchTool())
-                .saver(new MemorySaver())
+                .saver(redisSaver)
                 .build();
         
         return agent;

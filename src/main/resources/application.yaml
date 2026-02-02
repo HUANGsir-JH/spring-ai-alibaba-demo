@@ -2,6 +2,12 @@ spring:
   application:
     name: SAADemoApp
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 1
+
   ai:
     dashscope:
       api-key: sk-b3458569b7bd45708834fdfc06210519
