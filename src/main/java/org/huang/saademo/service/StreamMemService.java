@@ -13,6 +13,7 @@ import com.alibaba.cloud.ai.graph.streaming.StreamingOutput;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.huang.saademo.config.ApiKeyConfig;
+import org.huang.saademo.hook.MessageManageHook;
 import org.huang.saademo.hook.TimeRecordAgentHook;
 import org.huang.saademo.interceptor.TimeRecordModelInterceptor;
 import org.huang.saademo.interceptor.ToolRecordInterceptor;
@@ -26,6 +27,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.publisher.Flux;
+
+import java.util.UUID;
 
 
 @Service
@@ -52,11 +55,16 @@ public class StreamMemService {
     @Resource
     private ToolRecordInterceptor toolRecordInterceptor;
     
+    @Resource
+    private MessageManageHook messageManageHook;
+    
     public void streamCall(SseEmitter emitter, String prompt) {
         ReactAgent agent = createAgent();
         
+//        String threadId = UUID.randomUUID().toString();
+        
         RunnableConfig config = RunnableConfig.builder()
-                .threadId("thread-1")
+                .threadId("test1")
                 .addMetadata("user_id", "hjh")
                 .build();
         
@@ -71,10 +79,10 @@ public class StreamMemService {
                             
                             switch (type){
                                 case AGENT_MODEL_STREAMING -> sendEvent(emitter, "[MODEL]", message.getText());
-                                case AGENT_MODEL_FINISHED -> {
-                                    sendEvent(emitter, "[Done]", "Agent processing completed.");
-                                    emitter.complete();
-                                }
+//                                case AGENT_MODEL_FINISHED -> {
+//                                    sendEvent(emitter, "[Done]", "Agent processing completed.");
+//                                    emitter.complete();
+//                                }
                                 case AGENT_TOOL_STREAMING -> log.info("Tool streaming: {}", message.toString());
                                 case AGENT_TOOL_FINISHED -> {
                                     if(message instanceof ToolResponseMessage tool){
@@ -84,6 +92,7 @@ public class StreamMemService {
                                         });
                                     }
                                 }
+                                default -> log.info("Other streaming type: {}, message: {}", type, message==null?"[No Text]":message.getText());
                             }
                         }
                     }, error ->{
@@ -122,7 +131,7 @@ public class StreamMemService {
         ReactAgent agent = ReactAgent.builder()
                 .name("chat-agent")
                 .model(chatModel)
-                .hooks(timeRecordAgentHook)
+                .hooks(timeRecordAgentHook, messageManageHook)
                 .systemPrompt("你是一个乐于助人的智能助理，请根据用户的提问提供准确且有帮助的回答。")
                 .interceptors(timeRecordModelInterceptor,toolRecordInterceptor)
                 .methodTools(new TimeTool(), new WeatherSearchTool())
