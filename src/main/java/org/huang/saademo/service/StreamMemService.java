@@ -58,13 +58,13 @@ public class StreamMemService {
     @Resource
     private MessageManageHook messageManageHook;
     
-    public void streamCall(SseEmitter emitter, String prompt) {
+    public void streamCall(SseEmitter emitter, String prompt, String sessionId) {
         ReactAgent agent = createAgent();
         
 //        String threadId = UUID.randomUUID().toString();
         
         RunnableConfig config = RunnableConfig.builder()
-                .threadId("test1")
+                .threadId(sessionId)
                 .addMetadata("user_id", "hjh")
                 .build();
         

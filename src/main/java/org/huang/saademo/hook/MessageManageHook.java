@@ -7,15 +7,18 @@ import com.alibaba.cloud.ai.graph.agent.hook.messages.AgentCommand;
 import com.alibaba.cloud.ai.graph.agent.hook.messages.MessagesModelHook;
 import com.alibaba.cloud.ai.graph.agent.hook.messages.UpdatePolicy;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.huang.saademo.service.CompressContextService;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
+@Slf4j
 @HookPositions(value = {HookPosition.BEFORE_MODEL}) // 指定该 Hook 在模型调用前执行
 public class MessageManageHook extends MessagesModelHook {
     @Override
@@ -35,9 +38,18 @@ public class MessageManageHook extends MessagesModelHook {
         List<Message> messages = delEmptyMessages(previousMessages);
         int totalTokens = calculateTokenCount(messages);
         if (totalTokens > TOKEN_LIMIT) {
+            Optional<String> s = config.threadId();
+            if(s.isPresent()){
+                log.info("Session ID: {}, Total Tokens: {} exceed limit: {}, performing context compression.", s.get(), totalTokens, TOKEN_LIMIT);
+            }else{
+                log.info("Total Tokens: {} exceed limit: {}, performing context compression.", totalTokens, TOKEN_LIMIT);
+            }
+            long startTime = System.currentTimeMillis();
             // 超过 Token 限制，进行上下文压缩
             String compressedContext = compressContextService.compressContext(messages);
             List<Message> newMessages = List.of(new UserMessage(compressedContext));
+            long endTime = System.currentTimeMillis();
+            log.info("Session ID: {}, Context compression completed in {} ms.", s.orElse("N/A"), (endTime - startTime));
             return new AgentCommand(newMessages, UpdatePolicy.REPLACE);
         }
         

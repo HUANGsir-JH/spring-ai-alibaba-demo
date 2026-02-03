@@ -28,9 +28,9 @@ public class StreamMemController {
     }
     
     @GetMapping("/agent")
-    public SseEmitter streamAgent(String prompt) {
+    public SseEmitter streamAgent(String prompt, String sessionId) {
         SseEmitter emitter = generateEmitter();
-        streamMemService.streamCall(emitter, prompt);
+        streamMemService.streamCall(emitter, prompt, sessionId);
         return emitter;
     }
 
