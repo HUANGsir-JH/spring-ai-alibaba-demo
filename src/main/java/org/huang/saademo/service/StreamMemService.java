@@ -85,7 +85,14 @@ public class StreamMemService {
                             Message message = modelResponse.message();
                             
                             switch (type){
-                                case AGENT_MODEL_STREAMING -> sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_MODEL, message.getText());
+                                case AGENT_MODEL_STREAMING -> {
+                                    Object thinkContent = message.getMetadata().get("reasoningContent");
+                                    if(thinkContent!=null && !thinkContent.toString().isEmpty()){ // 有思考内容
+                                        sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_THINKING, thinkContent.toString());
+                                    }else{ // 纯模型输出
+                                        sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_MODEL, message.getText());
+                                    }
+                                }
                                 case AGENT_TOOL_STREAMING -> log.info("Tool streaming: {}", message.toString());
                                 case AGENT_TOOL_FINISHED -> {
                                     if(message instanceof ToolResponseMessage tool){

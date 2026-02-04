@@ -8,10 +8,13 @@ import com.alibaba.cloud.ai.graph.agent.hook.messages.MessagesModelHook;
 import com.alibaba.cloud.ai.graph.agent.hook.messages.UpdatePolicy;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.huang.saademo.common.Constants;
+import org.huang.saademo.manager.SSEManager;
 import org.huang.saademo.service.CompressContextService;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +28,9 @@ public class MessageManageHook extends MessagesModelHook {
     public String getName() {
         return "MessageManageHook";
     }
+    
+    @Resource
+    private SSEManager sseManager;
     
     @Resource
     private CompressContextService compressContextService;
@@ -46,6 +52,10 @@ public class MessageManageHook extends MessagesModelHook {
             }
             long startTime = System.currentTimeMillis();
             // 超过 Token 限制，进行上下文压缩
+            SseEmitter emitter = sseManager.getEmitter(s.orElse("N/A"));
+            if (emitter != null) {
+                sseManager.sendEvent(emitter,s.orElse("N/A"), Constants.SSE_EVENT_CONTEXT, "Context tokens: " + totalTokens + " exceed limit: " + TOKEN_LIMIT + ", performing compression...");
+            }
             String compressedContext = compressContextService.compressContext(messages);
             List<Message> newMessages = List.of(new UserMessage(compressedContext));
             long endTime = System.currentTimeMillis();
