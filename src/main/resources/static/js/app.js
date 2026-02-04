@@ -171,35 +171,88 @@ function connectSSE(prompt) {
         const eventSource = new EventSource(url);
         state.eventSources.set(sessionId, eventSource);
 
-        // 用于累积 AI 响应的内容
-        let assistantResponse = '';
-        let currentEventType = null;
-        let lastMessageElement = null;
-
         // 连接打开
         eventSource.onopen = () => {
             console.log('SSE 连接已建立');
         };
 
-        // 接收消息
-        eventSource.onmessage = (event) => {
-            try {
-                const data = JSON.parse(event.data);
-                const { name, data: content } = data;
+        // 监听模型响应事件
+        eventSource.addEventListener(SSE_EVENTS.MODEL, (event) => {
+            handleSSEEvent(SSE_EVENTS.MODEL, event.data, {
+                sessionId,
+                appendMessage,
+                updateLastMessage,
+                setStreamingState
+            });
+        });
 
-                // 处理不同类型的事件
-                handleSSEEvent(name, content, {
-                    sessionId,
-                    appendMessage,
-                    updateLastMessage,
-                    setStreamingState
-                });
-            } catch (e) {
-                console.error('解析 SSE 数据失败:', e);
-            }
-        };
+        // 监听工具调用事件
+        eventSource.addEventListener(SSE_EVENTS.TOOL, (event) => {
+            handleSSEEvent(SSE_EVENTS.TOOL, event.data, {
+                sessionId,
+                appendMessage,
+                updateLastMessage,
+                setStreamingState
+            });
+        });
 
-        // 错误处理
+        // 监听思考过程事件
+        eventSource.addEventListener(SSE_EVENTS.THINKING, (event) => {
+            handleSSEEvent(SSE_EVENTS.THINKING, event.data, {
+                sessionId,
+                appendMessage,
+                updateLastMessage,
+                setStreamingState
+            });
+        });
+
+        // 监听上下文压缩事件
+        eventSource.addEventListener(SSE_EVENTS.CONTEXT, (event) => {
+            handleSSEEvent(SSE_EVENTS.CONTEXT, event.data, {
+                sessionId,
+                appendMessage,
+                updateLastMessage,
+                setStreamingState
+            });
+        });
+
+        // 监听完成事件
+        eventSource.addEventListener(SSE_EVENTS.COMPLETE, (event) => {
+            handleSSEEvent(SSE_EVENTS.COMPLETE, event.data, {
+                sessionId,
+                appendMessage,
+                updateLastMessage,
+                setStreamingState
+            });
+            eventSource.close();
+            state.eventSources.delete(sessionId);
+        });
+
+        // 监听错误事件
+        eventSource.addEventListener(SSE_EVENTS.ERROR, (event) => {
+            handleSSEEvent(SSE_EVENTS.ERROR, event.data, {
+                sessionId,
+                appendMessage,
+                updateLastMessage,
+                setStreamingState
+            });
+            eventSource.close();
+            state.eventSources.delete(sessionId);
+        });
+
+        // 监听超时事件
+        eventSource.addEventListener(SSE_EVENTS.TIMEOUT, (event) => {
+            handleSSEEvent(SSE_EVENTS.TIMEOUT, event.data, {
+                sessionId,
+                appendMessage,
+                updateLastMessage,
+                setStreamingState
+            });
+            eventSource.close();
+            state.eventSources.delete(sessionId);
+        });
+
+        // 连接错误处理
         eventSource.onerror = (error) => {
             console.error('SSE 连接错误:', error);
             setStreamingState(false);

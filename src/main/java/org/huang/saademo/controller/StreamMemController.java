@@ -18,7 +18,7 @@ public class StreamMemController {
     @Resource
     private SSEManager sseManager;
     
-    @GetMapping("/agent")
+    @GetMapping(value="/agent", produces = "text/event-stream; charset=utf-8")
     public SseEmitter streamAgent(String prompt, String sessionId) {
         SseEmitter emitter = sseManager.createEmitter(sessionId);
         streamMemService.streamCall(prompt, sessionId);
