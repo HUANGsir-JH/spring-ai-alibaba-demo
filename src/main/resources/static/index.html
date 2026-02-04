@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 助手</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>历史记录</h2>
+                <button class="btn-new-chat" id="newChatBtn">+ 新建对话</button>
+            </div>
+            <div class="history-list" id="historyList">
+                <!-- 历史记录列表 -->
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 顶部栏 -->
+            <header class="header">
+                <div class="session-config">
+                    <label for="sessionIdInput">Session ID:</label>
+                    <input type="text" id="sessionIdInput" placeholder="输入 Session ID">
+                    <button class="btn-set-session" id="setSessionBtn">设置</button>
+                </div>
+            </header>
+
+            <!-- 消息区域 -->
+            <div class="chat-container" id="chatContainer">
+                <!-- 消息列表 -->
+            </div>
+
+            <!-- 输入区域 -->
+            <footer class="input-area">
+                <div class="input-wrapper">
+                    <textarea id="promptInput" placeholder="输入消息..." rows="3"></textarea>
+                    <button class="btn-send" id="sendBtn">发送</button>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Markdown 渲染库 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- 主脚本 -->
+    <script src="/js/app.js"></script>
+</body>
+</html>
