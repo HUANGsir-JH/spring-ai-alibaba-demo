@@ -12,11 +12,13 @@ import com.alibaba.cloud.ai.graph.streaming.OutputType;
 import com.alibaba.cloud.ai.graph.streaming.StreamingOutput;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.huang.saademo.common.Constants;
 import org.huang.saademo.config.ApiKeyConfig;
 import org.huang.saademo.hook.MessageManageHook;
 import org.huang.saademo.hook.TimeRecordAgentHook;
 import org.huang.saademo.interceptor.TimeRecordModelInterceptor;
 import org.huang.saademo.interceptor.ToolRecordInterceptor;
+import org.huang.saademo.manager.SSEManager;
 import org.huang.saademo.tools.TimeTool;
 import org.huang.saademo.tools.WeatherSearchTool;
 import org.redisson.Redisson;
@@ -41,6 +43,9 @@ public class StreamMemService {
     @Resource(name="stramAgentTaskExecutor")
     private ThreadPoolTaskExecutor executor;
     
+    @Resource
+    private SSEManager sseManager;
+    
     private static final String MODEL_NAME = "qwen3-max-2026-01-23";
     
     @Resource(name="redissonClient")
@@ -58,7 +63,7 @@ public class StreamMemService {
     @Resource
     private MessageManageHook messageManageHook;
     
-    public void streamCall(SseEmitter emitter, String prompt, String sessionId) {
+    public void streamCall(String prompt, String sessionId) {
         ReactAgent agent = createAgent();
         
 //        String threadId = UUID.randomUUID().toString();
@@ -67,6 +72,8 @@ public class StreamMemService {
                 .threadId(sessionId)
                 .addMetadata("user_id", "hjh")
                 .build();
+        
+        SseEmitter emitter = sseManager.getEmitter(sessionId);
         
         try{
             executor.submit(()->{
@@ -78,17 +85,13 @@ public class StreamMemService {
                             Message message = modelResponse.message();
                             
                             switch (type){
-                                case AGENT_MODEL_STREAMING -> sendEvent(emitter, "[MODEL]", message.getText());
-//                                case AGENT_MODEL_FINISHED -> {
-//                                    sendEvent(emitter, "[Done]", "Agent processing completed.");
-//                                    emitter.complete();
-//                                }
+                                case AGENT_MODEL_STREAMING -> sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_MODEL, message.getText());
                                 case AGENT_TOOL_STREAMING -> log.info("Tool streaming: {}", message.toString());
                                 case AGENT_TOOL_FINISHED -> {
                                     if(message instanceof ToolResponseMessage tool){
                                         tool.getResponses().forEach(response->{
                                             String toolOutput = "id: "+response.id()+", name: "+response.name()+", data: "+ response.responseData();
-                                            sendEvent(emitter, "[TOOL]", toolOutput);
+                                            sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_TOOL, toolOutput);
                                         });
                                     }
                                 }
@@ -97,21 +100,21 @@ public class StreamMemService {
                         }
                     }, error ->{
                         log.error("Error in streaming: ", error);
-                        sendEvent(emitter, "[Error]", "An error occurred: " + error.getMessage());
+                        sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_ERROR, "An error occurred: " + error.getMessage());
                         emitter.completeWithError(error);
                     }, ()->{
-                        sendEvent(emitter, "[Complete]", "AI Streaming completed.");
+                        sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_COMPLETE, "Stream completed");
                         emitter.complete();
                     });
                 }catch (Exception e){
                     log.error("Error during streaming call", e);
-                    sendEvent(emitter, "[Error]", "An error occurred: " + e.getMessage());
+                    sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_ERROR, "An error occurred: " + e.getMessage());
                     emitter.completeWithError(e);
                 }
             });
         } catch (Exception e) {
             log.error("Error submitting task to executor", e);
-            sendEvent(emitter, "[Error]", "An error occurred: " + e.getMessage());
+            sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_ERROR, "An error occurred: " + e.getMessage());
             emitter.completeWithError(e);
         }
         
