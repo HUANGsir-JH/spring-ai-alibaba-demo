@@ -17,21 +17,37 @@ const SSE_EVENTS = {
 
 // ==================== DOM 元素 ====================
 const elements = {
+    // 主要元素
     chatContainer: document.getElementById('chatContainer'),
     promptInput: document.getElementById('promptInput'),
     sendBtn: document.getElementById('sendBtn'),
+    attachBtn: document.getElementById('attachBtn'),
+
+    // 会话相关
+    sessionIdDisplay: document.getElementById('sessionIdDisplay'),
     sessionIdInput: document.getElementById('sessionIdInput'),
+    configSessionBtn: document.getElementById('configSessionBtn'),
     setSessionBtn: document.getElementById('setSessionBtn'),
+    sessionModal: document.getElementById('sessionModal'),
+    closeModalBtn: document.getElementById('closeModalBtn'),
+    cancelSessionBtn: document.getElementById('cancelSessionBtn'),
+
+    // 历史记录
     newChatBtn: document.getElementById('newChatBtn'),
-    historyList: document.getElementById('historyList')
+    historyList: document.getElementById('historyList'),
+    historySearchInput: document.getElementById('historySearchInput'),
+
+    // 欢迎界面
+    welcomeScreen: document.getElementById('welcomeScreen')
 };
 
 // ==================== 状态管理 ====================
 let state = {
     currentSessionId: null,
-    currentHistory: [],
+    currentMessages: [],
     isStreaming: false,
-    eventSources: new Map() // 存储活跃的 EventSource 连接
+    eventSource: null,
+    currentStreamingMessageId: null
 };
 
 // ==================== 初始化 ====================
@@ -46,10 +62,18 @@ function init() {
     loadHistoryList();
 
     // 设置 marked.js 配置
-    marked.setOptions({
-        breaks: true,
-        gfm: true
-    });
+    if (typeof marked !== 'undefined') {
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+            highlight: function (code, lang) {
+                return code;
+            }
+        });
+    }
+
+    // 自动调整输入框高度
+    autoResizeTextarea();
 }
 
 // ==================== 事件绑定 ====================
@@ -57,31 +81,54 @@ function bindEvents() {
     // 发送按钮
     elements.sendBtn.addEventListener('click', sendMessage);
 
-    // 回车发送（Ctrl/Cmd + Enter 换行）
+    // 回车发送（Shift + Enter 换行）
     elements.promptInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            if (!e.ctrlKey && !e.metaKey) {
-                sendMessage();
-            }
+            sendMessage();
         }
     });
 
-    // 设置 sessionId
+    // 输入框自动调整高度
+    elements.promptInput.addEventListener('input', autoResizeTextarea);
+
+    // 会话配置
+    elements.configSessionBtn.addEventListener('click', () => {
+        elements.sessionModal.classList.add('show');
+        elements.sessionIdInput.value = state.currentSessionId;
+        elements.sessionIdInput.focus();
+    });
+
+    elements.closeModalBtn.addEventListener('click', closeSessionModal);
+    elements.cancelSessionBtn.addEventListener('click', closeSessionModal);
     elements.setSessionBtn.addEventListener('click', () => {
         const newSessionId = elements.sessionIdInput.value.trim();
         if (newSessionId) {
             switchSession(newSessionId);
+            closeSessionModal();
+        }
+    });
+
+    // 点击模态框背景关闭
+    elements.sessionModal.addEventListener('click', (e) => {
+        if (e.target === elements.sessionModal) {
+            closeSessionModal();
         }
     });
 
     // 新建对话
-    elements.newChatBtn.addEventListener('click', () => {
-        generateNewSessionId();
+    elements.newChatBtn.addEventListener('click', generateNewSessionId);
+
+    // 历史搜索
+    elements.historySearchInput.addEventListener('input', filterHistory);
+
+    // 附件上传（暂不实现功能）
+    elements.attachBtn.addEventListener('click', () => {
+        showNotification('文件上传功能即将推出');
     });
 
     // 窗口关闭时清理连接
-    window.addEventListener('beforeunload', cleanupAllConnections);
+    window.addEventListener('beforeunload', cleanup);
 }
 
 // ==================== Session 管理 ====================
@@ -92,33 +139,37 @@ function generateNewSessionId() {
 
 function switchSession(sessionId) {
     // 关闭当前连接
-    closeCurrentConnection();
+    cleanup();
 
     // 更新状态
     state.currentSessionId = sessionId;
-    elements.sessionIdInput.value = sessionId;
+    state.currentMessages = [];
+
+    // 更新 UI
+    elements.sessionIdDisplay.textContent = sessionId;
 
     // 清空聊天界面
     clearChatContainer();
+
+    // 显示欢迎界面
+    elements.welcomeScreen.classList.remove('hidden');
 
     // 加载该会话的历史消息
     loadSessionHistory(sessionId);
 
     // 更新侧边栏选中状态
-    updateHistoryListSelection(sessionId);
+    updateHistoryListSelection();
 }
 
-function closeCurrentConnection() {
-    if (state.eventSources.has(state.currentSessionId)) {
-        const eventSource = state.eventSources.get(state.currentSessionId);
-        eventSource.close();
-        state.eventSources.delete(state.currentSessionId);
+function closeSessionModal() {
+    elements.sessionModal.classList.remove('show');
+}
+
+function cleanup() {
+    if (state.eventSource) {
+        state.eventSource.close();
+        state.eventSource = null;
     }
-}
-
-function cleanupAllConnections() {
-    state.eventSources.forEach((es) => es.close());
-    state.eventSources.clear();
 }
 
 // ==================== 消息发送 ====================
@@ -139,22 +190,29 @@ function sendMessage() {
         generateNewSessionId();
     }
 
+    // 隐藏欢迎界面
+    elements.welcomeScreen.classList.add('hidden');
+
     // 显示用户消息
     appendMessage('user', prompt);
 
     // 保存到历史记录
-    saveToHistory({
+    saveMessageToHistory({
         sessionId: state.currentSessionId,
         role: 'user',
         content: prompt,
         timestamp: Date.now()
     });
 
-    // 清空输入框
+    // 清空输入框并重置高度
     elements.promptInput.value = '';
+    elements.promptInput.style.height = 'auto';
 
     // 禁用发送按钮
     setStreamingState(true);
+
+    // 显示思考中指示器
+    showThinkingIndicator();
 
     // 建立 SSE 连接
     connectSSE(prompt);
@@ -162,14 +220,14 @@ function sendMessage() {
 
 function connectSSE(prompt) {
     // 关闭之前的连接（如果有）
-    closeCurrentConnection();
+    cleanup();
 
     const sessionId = state.currentSessionId;
     const url = `/stream/mem/agent?prompt=${encodeURIComponent(prompt)}&sessionId=${encodeURIComponent(sessionId)}`;
 
     try {
         const eventSource = new EventSource(url);
-        state.eventSources.set(sessionId, eventSource);
+        state.eventSource = eventSource;
 
         // 连接打开
         eventSource.onopen = () => {
@@ -178,165 +236,158 @@ function connectSSE(prompt) {
 
         // 监听模型响应事件
         eventSource.addEventListener(SSE_EVENTS.MODEL, (event) => {
-            handleSSEEvent(SSE_EVENTS.MODEL, event.data, {
-                sessionId,
-                appendMessage,
-                updateLastMessage,
-                setStreamingState
-            });
+            handleModelEvent(event.data);
         });
 
         // 监听工具调用事件
         eventSource.addEventListener(SSE_EVENTS.TOOL, (event) => {
-            handleSSEEvent(SSE_EVENTS.TOOL, event.data, {
-                sessionId,
-                appendMessage,
-                updateLastMessage,
-                setStreamingState
-            });
+            handleToolEvent(event.data);
         });
 
         // 监听思考过程事件
         eventSource.addEventListener(SSE_EVENTS.THINKING, (event) => {
-            handleSSEEvent(SSE_EVENTS.THINKING, event.data, {
-                sessionId,
-                appendMessage,
-                updateLastMessage,
-                setStreamingState
-            });
+            handleThinkingEvent(event.data);
         });
 
-        // 监听上下文压缩事件
+        // 监听上下文事件
         eventSource.addEventListener(SSE_EVENTS.CONTEXT, (event) => {
-            handleSSEEvent(SSE_EVENTS.CONTEXT, event.data, {
-                sessionId,
-                appendMessage,
-                updateLastMessage,
-                setStreamingState
-            });
+            handleContextEvent(event.data);
         });
 
         // 监听完成事件
         eventSource.addEventListener(SSE_EVENTS.COMPLETE, (event) => {
-            handleSSEEvent(SSE_EVENTS.COMPLETE, event.data, {
-                sessionId,
-                appendMessage,
-                updateLastMessage,
-                setStreamingState
-            });
-            eventSource.close();
-            state.eventSources.delete(sessionId);
+            handleCompleteEvent(event.data);
+            cleanup();
         });
 
         // 监听错误事件
         eventSource.addEventListener(SSE_EVENTS.ERROR, (event) => {
-            handleSSEEvent(SSE_EVENTS.ERROR, event.data, {
-                sessionId,
-                appendMessage,
-                updateLastMessage,
-                setStreamingState
-            });
-            eventSource.close();
-            state.eventSources.delete(sessionId);
+            handleErrorEvent(event.data);
+            cleanup();
         });
 
         // 监听超时事件
         eventSource.addEventListener(SSE_EVENTS.TIMEOUT, (event) => {
-            handleSSEEvent(SSE_EVENTS.TIMEOUT, event.data, {
-                sessionId,
-                appendMessage,
-                updateLastMessage,
-                setStreamingState
-            });
-            eventSource.close();
-            state.eventSources.delete(sessionId);
+            handleTimeoutEvent(event.data);
+            cleanup();
         });
 
         // 连接错误处理
         eventSource.onerror = (error) => {
             console.error('SSE 连接错误:', error);
+            removeThinkingIndicator();
             setStreamingState(false);
 
-            // 检查连接状态
             if (eventSource.readyState === EventSource.CLOSED) {
                 console.log('SSE 连接已关闭');
             }
 
-            eventSource.close();
-            state.eventSources.delete(sessionId);
+            cleanup();
         };
 
     } catch (error) {
         console.error('创建 SSE 连接失败:', error);
+        removeThinkingIndicator();
         setStreamingState(false);
         appendMessage('assistant', '', SSE_EVENTS.ERROR, '连接失败，请重试');
     }
 }
 
 // ==================== SSE 事件处理 ====================
-function handleSSEEvent(eventName, content, handlers) {
-    const { appendMessage, updateLastMessage, setStreamingState } = handlers;
+function handleModelEvent(content) {
+    removeThinkingIndicator();
 
-    switch (eventName) {
-        case SSE_EVENTS.MODEL:
-            // 模型响应 - 累积显示
-            updateLastMessage(SSE_EVENTS.MODEL, content, true);
-            break;
+    if (!content) return;
 
-        case SSE_EVENTS.TOOL:
-            // 工具调用
-            appendMessage('assistant', '', SSE_EVENTS.TOOL, content);
-            break;
-
-        case SSE_EVENTS.THINKING:
-            // 思考过程
-            appendMessage('assistant', '', SSE_EVENTS.THINKING, content);
-            break;
-
-        case SSE_EVENTS.CONTEXT:
-            // 上下文压缩信息
-            appendMessage('assistant', '', SSE_EVENTS.CONTEXT, content);
-            break;
-
-        case SSE_EVENTS.COMPLETE:
-            // 完成 - 保存助手消息到历史
-            setStreamingState(false);
-            appendMessage('assistant', '', SSE_EVENTS.COMPLETE, '响应完成');
-
-            // 获取最后一条模型消息并保存
-            saveToHistory({
-                sessionId: state.currentSessionId,
-                role: 'assistant',
-                content: '[COMPLETE]',
-                timestamp: Date.now()
-            });
-            break;
-
-        case SSE_EVENTS.ERROR:
-            // 错误
-            setStreamingState(false);
-            appendMessage('assistant', '', SSE_EVENTS.ERROR, content);
-            break;
-
-        case SSE_EVENTS.TIMEOUT:
-            // 超时
-            setStreamingState(false);
-            appendMessage('assistant', '', SSE_EVENTS.TIMEOUT, '响应超时');
-            break;
-
-        default:
-            // 未知事件类型，也显示
-            if (eventName && content) {
-                appendMessage('assistant', '', eventName, content);
-            }
+    if (!state.currentStreamingMessageId) {
+        // 创建新的助手消息
+        const messageId = appendMessage('assistant', content, SSE_EVENTS.MODEL);
+        state.currentStreamingMessageId = messageId;
+    } else {
+        // 追加到现有消息
+        appendToMessage(state.currentStreamingMessageId, content);
     }
 }
 
+function handleToolEvent(content) {
+    removeThinkingIndicator();
+    if (content) {
+        appendMessage('assistant', content, SSE_EVENTS.TOOL);
+    }
+}
+
+function handleThinkingEvent(content) {
+    removeThinkingIndicator();
+    if (content) {
+        appendMessage('assistant', content, SSE_EVENTS.THINKING);
+    }
+}
+
+function handleContextEvent(content) {
+    if (content) {
+        appendMessage('assistant', content, SSE_EVENTS.CONTEXT);
+    }
+}
+
+function handleCompleteEvent(content) {
+    removeThinkingIndicator();
+    setStreamingState(false);
+    state.currentStreamingMessageId = null;
+
+    // 保存助手的最终消息到历史
+    saveAssistantMessageToHistory();
+}
+
+function handleErrorEvent(content) {
+    removeThinkingIndicator();
+    setStreamingState(false);
+    state.currentStreamingMessageId = null;
+    appendMessage('assistant', content || '发生错误', SSE_EVENTS.ERROR);
+}
+
+function handleTimeoutEvent(content) {
+    removeThinkingIndicator();
+    setStreamingState(false);
+    state.currentStreamingMessageId = null;
+    appendMessage('assistant', content || '响应超时', SSE_EVENTS.TIMEOUT);
+}
+
 // ==================== 消息显示 ====================
-function appendMessage(role, content, eventType = null, rawContent = null) {
+function appendMessage(role, content, eventType = null) {
+    const messageId = 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    const timestamp = Date.now();
+
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${role}`;
+    messageDiv.dataset.messageId = messageId;
+    messageDiv.dataset.timestamp = timestamp;
 
+    // 创建头像
+    const avatar = document.createElement('div');
+    avatar.className = 'message-avatar';
+    avatar.textContent = role === 'user' ? '我' : 'AI';
+
+    // 创建消息主体
+    const messageMain = document.createElement('div');
+    messageMain.className = 'message-main';
+
+    // 创建消息头部（作者和时间）
+    const messageHeader = document.createElement('div');
+    messageHeader.className = 'message-header';
+
+    const author = document.createElement('span');
+    author.className = 'message-author';
+    author.textContent = role === 'user' ? '你' : 'AI 助手';
+
+    const time = document.createElement('span');
+    time.className = 'message-time';
+    time.textContent = formatTime(timestamp);
+    time.title = new Date(timestamp).toLocaleString('zh-CN');
+
+    messageHeader.appendChild(author);
+    messageHeader.appendChild(time);
+
+    // 创建消息气泡
     const bubble = document.createElement('div');
     bubble.className = 'message-bubble';
 
@@ -350,54 +401,70 @@ function appendMessage(role, content, eventType = null, rawContent = null) {
     const contentDiv = document.createElement('div');
     contentDiv.className = 'markdown-content';
 
-    if (rawContent !== null) {
-        // 显示原始内容（用于事件消息）
-        contentDiv.textContent = rawContent;
+    if (eventType && eventType !== SSE_EVENTS.MODEL) {
+        // 非模型响应，显示原始文本
+        contentDiv.textContent = content;
     } else if (content) {
-        // 渲染 Markdown
-        contentDiv.innerHTML = marked.parse(content);
+        // 模型响应，渲染 Markdown
+        if (typeof marked !== 'undefined') {
+            contentDiv.innerHTML = marked.parse(content);
+        } else {
+            contentDiv.textContent = content;
+        }
     }
 
     bubble.appendChild(contentDiv);
-    messageDiv.appendChild(bubble);
+    messageMain.appendChild(messageHeader);
+    messageMain.appendChild(bubble);
+
+    // 创建消息操作按钮
+    const actions = createMessageActions(role, messageId, content);
+    messageMain.appendChild(actions);
+
+    // 组装消息
+    messageDiv.appendChild(avatar);
+    messageDiv.appendChild(messageMain);
 
     elements.chatContainer.appendChild(messageDiv);
     scrollToBottom();
 
-    return messageDiv;
+    // 保存到当前消息列表
+    state.currentMessages.push({
+        id: messageId,
+        role,
+        content,
+        eventType,
+        timestamp
+    });
+
+    return messageId;
 }
 
-function updateLastMessage(eventType, content, isStreaming = false) {
-    const messages = elements.chatContainer.querySelectorAll('.message.assistant');
-    if (messages.length === 0) {
-        // 没有助手消息，创建一个
-        appendMessage('assistant', '', eventType, content);
-        return;
-    }
+function appendToMessage(messageId, content) {
+    const messageDiv = elements.chatContainer.querySelector(`[data-message-id="${messageId}"]`);
+    if (!messageDiv) return;
 
-    const lastMessage = messages[messages.length - 1];
-    const lastEventTag = lastMessage.querySelector('.event-tag');
-    const contentDiv = lastMessage.querySelector('.markdown-content');
+    const contentDiv = messageDiv.querySelector('.markdown-content');
+    if (!contentDiv) return;
 
-    // 检查最后一个事件类型是否相同
-    if (lastEventTag && lastEventTag.dataset.event === eventType) {
-        // 追加内容
-        const currentText = contentDiv.textContent;
-        contentDiv.textContent = currentText + content;
+    // 获取当前内容
+    const currentContent = contentDiv.textContent;
+    const newContent = currentContent + content;
 
-        // 如果是流式响应，重新渲染 Markdown
-        if (contentDiv.innerHTML.includes('```')) {
-            const fullText = contentDiv.textContent;
-            contentDiv.innerHTML = marked.parse(fullText);
-        }
+    // 更新内容
+    if (typeof marked !== 'undefined') {
+        contentDiv.innerHTML = marked.parse(newContent);
     } else {
-        // 不同事件类型，创建新消息
-        appendMessage('assistant', '', eventType, content);
+        contentDiv.textContent = newContent;
     }
 
-    if (!isStreaming) {
-        scrollToBottom();
+    // 更新状态中的消息内容
+    const msgIndex = state.currentMessages.findIndex(m => m.id === messageId);
+    if (msgIndex !== -1) {
+        state.currentMessages[msgIndex].content = newContent;
     }
+
+    scrollToBottom();
 }
 
 function createEventTag(eventType) {
@@ -421,18 +488,81 @@ function getEventClass(eventType) {
     return eventClasses[eventType] || 'event-model';
 }
 
+function createMessageActions(role, messageId, content) {
+    const actions = document.createElement('div');
+    actions.className = 'message-actions';
+
+    // 复制按钮
+    const copyBtn = createActionButton('复制', () => {
+        copyToClipboard(content);
+        showNotification('已复制到剪贴板');
+    });
+    actions.appendChild(copyBtn);
+
+    // 用户消息添加重新编辑按钮
+    if (role === 'user') {
+        const editBtn = createActionButton('重新编辑', () => {
+            elements.promptInput.value = content;
+            elements.promptInput.focus();
+            autoResizeTextarea();
+        });
+        actions.appendChild(editBtn);
+    }
+
+    return actions;
+}
+
+function createActionButton(text, onClick) {
+    const btn = document.createElement('button');
+    btn.className = 'message-action-btn';
+    btn.textContent = text;
+    btn.addEventListener('click', onClick);
+    return btn;
+}
+
+function showThinkingIndicator() {
+    // 检查是否已存在思考指示器
+    if (elements.chatContainer.querySelector('.thinking-indicator')) {
+        return;
+    }
+
+    const indicator = document.createElement('div');
+    indicator.className = 'thinking-indicator';
+    indicator.innerHTML = `
+        <div class="loading-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <span>AI 正在思考...</span>
+    `;
+
+    elements.chatContainer.appendChild(indicator);
+    scrollToBottom();
+}
+
+function removeThinkingIndicator() {
+    const indicator = elements.chatContainer.querySelector('.thinking-indicator');
+    if (indicator) {
+        indicator.remove();
+    }
+}
+
 function clearChatContainer() {
     elements.chatContainer.innerHTML = '';
+    state.currentMessages = [];
 }
 
 function scrollToBottom() {
-    elements.chatContainer.scrollTop = elements.chatContainer.scrollHeight;
+    requestAnimationFrame(() => {
+        elements.chatContainer.scrollTop = elements.chatContainer.scrollHeight;
+    });
 }
 
 function setStreamingState(streaming) {
     state.isStreaming = streaming;
     elements.sendBtn.disabled = streaming;
-    elements.sendBtn.textContent = streaming ? '思考中...' : '发送';
+    elements.promptInput.disabled = streaming;
 }
 
 // ==================== 历史记录管理 ====================
@@ -454,76 +584,202 @@ function saveHistory(history) {
     }
 }
 
-function saveToHistory(message) {
+function saveMessageToHistory(message) {
     const history = getHistory();
     history.push(message);
 
-    // 只保留最近 100 条记录
-    if (history.length > 100) {
+    // 保留最近 1000 条记录
+    if (history.length > 1000) {
         history.shift();
     }
 
     saveHistory(history);
+
+    // 更新侧边栏
     loadHistoryList();
+}
+
+function saveAssistantMessageToHistory() {
+    // 保存所有助手消息（模型响应）
+    const assistantMessages = state.currentMessages.filter(m =>
+        m.role === 'assistant' && m.eventType === SSE_EVENTS.MODEL
+    );
+
+    assistantMessages.forEach(msg => {
+        if (msg.content) {
+            saveMessageToHistory({
+                sessionId: state.currentSessionId,
+                role: 'assistant',
+                content: msg.content,
+                timestamp: msg.timestamp
+            });
+        }
+    });
 }
 
 function loadSessionHistory(sessionId) {
     const history = getHistory();
     const sessionMessages = history.filter(m => m.sessionId === sessionId);
 
-    state.currentHistory = sessionMessages;
+    if (sessionMessages.length === 0) {
+        return;
+    }
+
+    // 隐藏欢迎界面
+    elements.welcomeScreen.classList.add('hidden');
+
+    // 按时间排序
+    sessionMessages.sort((a, b) => a.timestamp - b.timestamp);
 
     // 渲染消息
     sessionMessages.forEach(msg => {
         if (msg.role === 'user') {
             appendMessage('user', msg.content);
+        } else if (msg.role === 'assistant') {
+            appendMessage('assistant', msg.content, SSE_EVENTS.MODEL);
         }
-        // 跳过系统消息（如 [COMPLETE]）
     });
 }
 
 function loadHistoryList() {
     const history = getHistory();
 
-    // 按 sessionId 分组，只保留每个 session 的第一条用户消息作为标题
+    // 按 sessionId 分组
     const sessions = new Map();
 
     history.forEach(msg => {
-        if (msg.role === 'user') {
-            if (!sessions.has(msg.sessionId)) {
-                sessions.set(msg.sessionId, {
-                    sessionId: msg.sessionId,
-                    preview: msg.content.substring(0, 20),
-                    timestamp: msg.timestamp
-                });
-            }
+        if (!sessions.has(msg.sessionId)) {
+            sessions.set(msg.sessionId, {
+                sessionId: msg.sessionId,
+                messages: [],
+                firstTimestamp: msg.timestamp,
+                lastTimestamp: msg.timestamp
+            });
         }
+
+        const session = sessions.get(msg.sessionId);
+        session.messages.push(msg);
+        session.lastTimestamp = Math.max(session.lastTimestamp, msg.timestamp);
     });
 
-    // 转换为数组并按时间倒序排序
+    // 转换为数组并按最后时间倒序排序
     const sessionList = Array.from(sessions.values())
-        .sort((a, b) => b.timestamp - a.timestamp);
+        .sort((a, b) => b.lastTimestamp - a.lastTimestamp);
 
     // 渲染
-    elements.historyList.innerHTML = sessionList.map(session => `
-        <div class="history-item ${session.sessionId === state.currentSessionId ? 'active' : ''}"
-             data-session-id="${session.sessionId}">
-            ${escapeHtml(session.preview) || '新对话'}...
-        </div>
-    `).join('');
+    renderHistoryList(sessionList);
+}
+
+function renderHistoryList(sessionList) {
+    if (sessionList.length === 0) {
+        elements.historyList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary); font-size: 13px;">暂无历史记录</div>';
+        return;
+    }
+
+    elements.historyList.innerHTML = sessionList.map(session => {
+        // 获取第一条用户消息作为标题
+        const firstUserMsg = session.messages.find(m => m.role === 'user');
+        const title = firstUserMsg ? firstUserMsg.content.substring(0, 30) : '新对话';
+        const timeStr = formatRelativeTime(session.lastTimestamp);
+
+        return `
+            <div class="history-item ${session.sessionId === state.currentSessionId ? 'active' : ''}"
+                 data-session-id="${session.sessionId}">
+                <div class="history-item-content">
+                    <div class="history-item-title">${escapeHtml(title)}${title.length > 30 ? '...' : ''}</div>
+                    <div class="history-item-time">${timeStr}</div>
+                </div>
+                <div class="history-item-actions">
+                    <button class="history-item-btn btn-delete" title="删除">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                            <path d="M5 1h4M1 3h12M11 3v9a1 1 0 01-1 1H4a1 1 0 01-1-1V3"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
 
     // 绑定点击事件
     elements.historyList.querySelectorAll('.history-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const sessionId = item.dataset.sessionId;
+        const sessionId = item.dataset.sessionId;
+
+        // 点击切换会话
+        item.addEventListener('click', (e) => {
+            // 如果点击的是删除按钮，不切换会话
+            if (e.target.closest('.btn-delete')) {
+                return;
+            }
             switchSession(sessionId);
         });
+
+        // 删除按钮
+        const deleteBtn = item.querySelector('.btn-delete');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteSession(sessionId);
+            });
+        }
     });
 }
 
-function updateHistoryListSelection(sessionId) {
+function filterHistory() {
+    const searchText = elements.historySearchInput.value.toLowerCase().trim();
+
+    if (!searchText) {
+        loadHistoryList();
+        return;
+    }
+
+    const history = getHistory();
+    const sessions = new Map();
+
+    history.forEach(msg => {
+        // 搜索消息内容
+        if (msg.content.toLowerCase().includes(searchText)) {
+            if (!sessions.has(msg.sessionId)) {
+                sessions.set(msg.sessionId, {
+                    sessionId: msg.sessionId,
+                    messages: [],
+                    firstTimestamp: msg.timestamp,
+                    lastTimestamp: msg.timestamp
+                });
+            }
+
+            const session = sessions.get(msg.sessionId);
+            session.messages.push(msg);
+            session.lastTimestamp = Math.max(session.lastTimestamp, msg.timestamp);
+        }
+    });
+
+    const sessionList = Array.from(sessions.values())
+        .sort((a, b) => b.lastTimestamp - a.lastTimestamp);
+
+    renderHistoryList(sessionList);
+}
+
+function deleteSession(sessionId) {
+    if (!confirm('确定要删除这个对话吗？')) {
+        return;
+    }
+
+    const history = getHistory();
+    const filteredHistory = history.filter(m => m.sessionId !== sessionId);
+    saveHistory(filteredHistory);
+
+    // 如果删除的是当前会话，创建新会话
+    if (sessionId === state.currentSessionId) {
+        generateNewSessionId();
+    }
+
+    loadHistoryList();
+    showNotification('对话已删除');
+}
+
+function updateHistoryListSelection() {
     elements.historyList.querySelectorAll('.history-item').forEach(item => {
-        if (item.dataset.sessionId === sessionId) {
+        if (item.dataset.sessionId === state.currentSessionId) {
             item.classList.add('active');
         } else {
             item.classList.remove('active');
@@ -538,29 +794,87 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+function copyToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).catch(err => {
+            console.error('复制失败:', err);
+            fallbackCopyToClipboard(text);
+        });
+    } else {
+        fallbackCopyToClipboard(text);
+    }
+}
+
+function fallbackCopyToClipboard(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+        document.execCommand('copy');
+    } catch (err) {
+        console.error('复制失败:', err);
+    }
+    document.body.removeChild(textarea);
+}
+
 function showNotification(message) {
-    // 简单的通知实现
+    // 移除已存在的通知
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+
     const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: #1976d2;
-        color: white;
-        padding: 12px 24px;
-        border-radius: 8px;
-        z-index: 1000;
-        animation: fadeIn 0.3s ease;
-    `;
+    notification.className = 'notification';
     notification.textContent = message;
     document.body.appendChild(notification);
 
     setTimeout(() => {
-        notification.style.opacity = '0';
-        notification.style.transition = 'opacity 0.3s';
+        notification.classList.add('hide');
         setTimeout(() => notification.remove(), 300);
-    }, 2000);
+    }, 2500);
+}
+
+function formatTime(timestamp) {
+    const date = new Date(timestamp);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+}
+
+function formatRelativeTime(timestamp) {
+    const now = Date.now();
+    const diff = now - timestamp;
+
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (seconds < 60) {
+        return '刚刚';
+    } else if (minutes < 60) {
+        return `${minutes}分钟前`;
+    } else if (hours < 24) {
+        return `${hours}小时前`;
+    } else if (days < 7) {
+        return `${days}天前`;
+    } else {
+        const date = new Date(timestamp);
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${month}-${day}`;
+    }
+}
+
+function autoResizeTextarea() {
+    const textarea = elements.promptInput;
+    textarea.style.height = 'auto';
+    const newHeight = Math.min(textarea.scrollHeight, 200);
+    textarea.style.height = newHeight + 'px';
 }
 
 // ==================== 启动 ====================
