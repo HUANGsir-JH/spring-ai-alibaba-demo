@@ -16,7 +16,7 @@ import static com.alibaba.cloud.ai.graph.agent.tools.ToolContextConstants.AGENT_
 @Slf4j
 public class TimeTool {
     
-    @Tool(description = "Get the current time in YYYY-MM-DD HH:MM:SS format")
+    @Tool(name="getCurrentTime",description = "Get the current time in YYYY-MM-DD HH:MM:SS format")
     public String getCurrentTime(ToolContext toolContext) {
         RunnableConfig config = (RunnableConfig) toolContext.getContext().get(AGENT_CONFIG_CONTEXT_KEY);
         Optional<Object> id = config.metadata("user_id");

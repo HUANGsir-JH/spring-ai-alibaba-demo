@@ -31,6 +31,8 @@ public class TimeRecordModelInterceptor extends ModelInterceptor {
         
         // 输出请求的详细信息
         System.out.println("System Message: " + systemMessage);
+        // 根据SAA文档，在Interceptor中对Messages的修改仅对当前调用有效，不会影响后续调用
+        // 如果要持久化修改，需要在Hook中进行处理
         System.out.println("Messages: " + messages);
         System.out.println("Options: " + options);
         System.out.println("Dynamic Tool Callbacks: " + dynamicToolCallbacks);

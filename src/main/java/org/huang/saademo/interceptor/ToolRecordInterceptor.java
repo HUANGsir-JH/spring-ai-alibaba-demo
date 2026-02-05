@@ -19,11 +19,14 @@ public class ToolRecordInterceptor extends ToolInterceptor {
         String toolCallId = request.getToolCallId();
         String toolName = request.getToolName();
         
+        Map<String,Object> extraState = (Map<String, Object>) request.getContext().get("extraState");
+        
         // 输出请求的详细信息
         System.out.println("Tool Name: " + toolName);
         System.out.println("Tool Call ID: " + toolCallId);
         System.out.println("Arguments: " + arguments);
         System.out.println("Context: " + context);
+        System.out.println("Extra State: " + extraState);
         
         ToolCallResponse response = handler.call(request);
         

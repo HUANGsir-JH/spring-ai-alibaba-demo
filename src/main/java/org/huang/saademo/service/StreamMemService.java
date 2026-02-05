@@ -6,6 +6,8 @@ import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import com.alibaba.cloud.ai.graph.NodeOutput;
 import com.alibaba.cloud.ai.graph.RunnableConfig;
 import com.alibaba.cloud.ai.graph.agent.ReactAgent;
+import com.alibaba.cloud.ai.graph.agent.hook.hip.HumanInTheLoopHook;
+import com.alibaba.cloud.ai.graph.agent.hook.hip.ToolConfig;
 import com.alibaba.cloud.ai.graph.checkpoint.savers.MemorySaver;
 import com.alibaba.cloud.ai.graph.checkpoint.savers.redis.RedisSaver;
 import com.alibaba.cloud.ai.graph.streaming.OutputType;
@@ -137,6 +139,12 @@ public class StreamMemService {
         // 使用RedisSaver作为存储器
         RedisSaver redisSaver = RedisSaver.builder()
                 .redisson(redissonClient).build();
+        
+        // 配置Human-in-the-loop Hook，暂时不加入agent中使用
+        HumanInTheLoopHook human = HumanInTheLoopHook.builder().approvalOn("getCurrentTime",
+                ToolConfig.builder()
+                        .description("Get the current time need human approval")
+                        .build()).build();
         
         ReactAgent agent = ReactAgent.builder()
                 .name("chat-agent")

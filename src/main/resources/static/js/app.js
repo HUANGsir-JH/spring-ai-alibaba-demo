@@ -45,6 +45,7 @@ const elements = {
 let state = {
     currentSessionId: null,
     currentMessages: [],
+    currentRoundMessages: [], // 当前轮次的消息，用于保存历史
     isStreaming: false,
     eventSource: null,
     currentStreamingMessageId: null
@@ -193,6 +194,9 @@ function sendMessage() {
     // 隐藏欢迎界面
     elements.welcomeScreen.classList.add('hidden');
 
+    // 清空当前轮次消息记录
+    state.currentRoundMessages = [];
+
     // 显示用户消息
     appendMessage('user', prompt);
 
@@ -201,6 +205,7 @@ function sendMessage() {
         sessionId: state.currentSessionId,
         role: 'user',
         content: prompt,
+        eventType: null,
         timestamp: Date.now()
     });
 
@@ -343,6 +348,8 @@ function handleErrorEvent(content) {
     setStreamingState(false);
     state.currentStreamingMessageId = null;
     appendMessage('assistant', content || '发生错误', SSE_EVENTS.ERROR);
+    // 保存错误消息到历史
+    saveAssistantMessageToHistory();
 }
 
 function handleTimeoutEvent(content) {
@@ -350,10 +357,12 @@ function handleTimeoutEvent(content) {
     setStreamingState(false);
     state.currentStreamingMessageId = null;
     appendMessage('assistant', content || '响应超时', SSE_EVENTS.TIMEOUT);
+    // 保存超时消息到历史
+    saveAssistantMessageToHistory();
 }
 
 // ==================== 消息显示 ====================
-function appendMessage(role, content, eventType = null) {
+function appendMessage(role, content, eventType = null, isFromHistory = false) {
     const messageId = 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     const timestamp = Date.now();
 
@@ -428,14 +437,22 @@ function appendMessage(role, content, eventType = null) {
     elements.chatContainer.appendChild(messageDiv);
     scrollToBottom();
 
-    // 保存到当前消息列表
-    state.currentMessages.push({
+    // 消息数据对象
+    const messageData = {
         id: messageId,
         role,
         content,
         eventType,
         timestamp
-    });
+    };
+
+    // 保存到当前消息列表
+    state.currentMessages.push(messageData);
+
+    // 如果不是从历史记录加载，且是助手消息，添加到当前轮次消息列表
+    if (!isFromHistory && role === 'assistant') {
+        state.currentRoundMessages.push(messageData);
+    }
 
     return messageId;
 }
@@ -462,6 +479,12 @@ function appendToMessage(messageId, content) {
     const msgIndex = state.currentMessages.findIndex(m => m.id === messageId);
     if (msgIndex !== -1) {
         state.currentMessages[msgIndex].content = newContent;
+    }
+
+    // 同时更新当前轮次消息内容
+    const roundMsgIndex = state.currentRoundMessages.findIndex(m => m.id === messageId);
+    if (roundMsgIndex !== -1) {
+        state.currentRoundMessages[roundMsgIndex].content = newContent;
     }
 
     scrollToBottom();
@@ -551,6 +574,7 @@ function removeThinkingIndicator() {
 function clearChatContainer() {
     elements.chatContainer.innerHTML = '';
     state.currentMessages = [];
+    state.currentRoundMessages = [];
 }
 
 function scrollToBottom() {
@@ -600,21 +624,21 @@ function saveMessageToHistory(message) {
 }
 
 function saveAssistantMessageToHistory() {
-    // 保存所有助手消息（模型响应）
-    const assistantMessages = state.currentMessages.filter(m =>
-        m.role === 'assistant' && m.eventType === SSE_EVENTS.MODEL
-    );
-
-    assistantMessages.forEach(msg => {
-        if (msg.content) {
+    // 只保存当前轮次的助手消息（避免重复保存）
+    state.currentRoundMessages.forEach(msg => {
+        if (msg.content && msg.role === 'assistant') {
             saveMessageToHistory({
                 sessionId: state.currentSessionId,
                 role: 'assistant',
                 content: msg.content,
+                eventType: msg.eventType,
                 timestamp: msg.timestamp
             });
         }
     });
+
+    // 清空当前轮次消息记录
+    state.currentRoundMessages = [];
 }
 
 function loadSessionHistory(sessionId) {
@@ -634,9 +658,11 @@ function loadSessionHistory(sessionId) {
     // 渲染消息
     sessionMessages.forEach(msg => {
         if (msg.role === 'user') {
-            appendMessage('user', msg.content);
+            appendMessage('user', msg.content, null, true);
         } else if (msg.role === 'assistant') {
-            appendMessage('assistant', msg.content, SSE_EVENTS.MODEL);
+            // 使用保存的 eventType，如果没有则默认为 MODEL
+            const eventType = msg.eventType || SSE_EVENTS.MODEL;
+            appendMessage('assistant', msg.content, eventType, true);
         }
     });
 }
