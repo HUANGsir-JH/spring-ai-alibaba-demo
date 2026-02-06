@@ -84,6 +84,7 @@ public class StreamMemService {
                 humanDecision = approveAll(metadata);
             }else if(humanResponse.equals(Constants.TOOL_EDIT)){
                 // todo 编辑功能需要前端提供编辑界面，用户编辑后将修改后的结果传回后端，这个过程比较复杂，后续再完善，当前仅传递edit这个状态。
+                // todo 目前标记edit状态会当作批准处理，应该算作bug，需要后续完善
                 humanDecision = edit(metadata);
             }else if(humanResponse.equals(Constants.TOOL_REJECT)) {
                 humanDecision = rejectAll(metadata);
@@ -175,7 +176,6 @@ public class StreamMemService {
         
         // 配置Human-in-the-loop Hook，当调用getCurrentTime工具时需要人工批准
         // 我咋感觉这功能那么难用呢？如果要用户介入处理，就需要在前端展示一个批准界面，用户批准后再把批准结果传回后端，这个过程中还要维护好metadata的状态，不然就很麻烦了
-        // todo 后续完善人机交互式批准功能,但是批准又需要metadata，得考虑如何在sse结束后保存这个metadata
         HumanInTheLoopHook human = HumanInTheLoopHook.builder().approvalOn("getCurrentTime",
                 ToolConfig.builder()
                         .description("Get the current time need human approval")
@@ -185,13 +185,22 @@ public class StreamMemService {
                 .name("chat-agent")
                 .model(chatModel)
                 .hooks(timeRecordAgentHook, messageManageHook, human)
-                .systemPrompt("你是一个乐于助人的智能助理，请根据用户的提问提供准确且有帮助的回答。")
+                .systemPrompt(genSystemPrompt())
                 .interceptors(timeRecordModelInterceptor,toolRecordInterceptor)
                 .methodTools(new TimeTool(), new WeatherSearchTool())
                 .saver(redisSaver)
                 .build();
         
         return agent;
+    }
+    
+    private String genSystemPrompt(){
+        return """
+                你是一个智能助手，你的任务是根据用户的输入提供有用的信息和帮助。
+                你可以使用工具来获取信息或执行任务，但在使用某些工具之前需要获得用户的批准。
+                如果用户批准了工具的使用，请使用该工具并提供结果；
+                如果用户拒绝了工具的使用，询问用户是否需要编辑工具的参数或是进行其他操作；
+                """;
     }
     
     private InterruptionMetadata approveAll(InterruptionMetadata metadata){

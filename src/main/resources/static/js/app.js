@@ -12,7 +12,15 @@ const SSE_EVENTS = {
     TOOL: '[TOOL]',
     THINKING: '[THINKING]',
     CONTEXT: '[CONTEXT]',
-    TIMEOUT: '[TIMEOUT]'
+    TIMEOUT: '[TIMEOUT]',
+    INTERRUPT: '[INTERRUPT]'
+};
+
+// 人工响应类型
+const HUMAN_RESPONSE = {
+    APPROVE: 0,
+    EDIT: 1,
+    REJECT: 2
 };
 
 // ==================== DOM 元素 ====================
@@ -48,7 +56,8 @@ let state = {
     currentRoundMessages: [], // 当前轮次的消息，用于保存历史
     isStreaming: false,
     eventSource: null,
-    currentStreamingMessageId: null
+    currentStreamingMessageId: null,
+    pendingInterrupt: false // 是否有待处理的中断
 };
 
 // ==================== 初始化 ====================
@@ -145,6 +154,7 @@ function switchSession(sessionId) {
     // 更新状态
     state.currentSessionId = sessionId;
     state.currentMessages = [];
+    state.pendingInterrupt = false;
 
     // 更新 UI
     elements.sessionIdDisplay.textContent = sessionId;
@@ -277,6 +287,11 @@ function connectSSE(prompt) {
             cleanup();
         });
 
+        // 监听中断事件（工具执行需人工确认）
+        eventSource.addEventListener(SSE_EVENTS.INTERRUPT, (event) => {
+            handleInterruptEvent(event.data);
+        });
+
         // 连接错误处理
         eventSource.onerror = (error) => {
             console.error('SSE 连接错误:', error);
@@ -336,8 +351,15 @@ function handleContextEvent(content) {
 
 function handleCompleteEvent(content) {
     removeThinkingIndicator();
-    setStreamingState(false);
     state.currentStreamingMessageId = null;
+
+    // 如果有待处理的中断，显示确认按钮，不恢复输入状态
+    if (state.pendingInterrupt) {
+        showInterruptActions();
+        setStreamingState(false);
+    } else {
+        setStreamingState(false);
+    }
 
     // 保存助手的最终消息到历史
     saveAssistantMessageToHistory();
@@ -359,6 +381,191 @@ function handleTimeoutEvent(content) {
     appendMessage('assistant', content || '响应超时', SSE_EVENTS.TIMEOUT);
     // 保存超时消息到历史
     saveAssistantMessageToHistory();
+}
+
+function handleInterruptEvent(content) {
+    removeThinkingIndicator();
+    state.pendingInterrupt = true;
+    if (content) {
+        appendMessage('assistant', content, SSE_EVENTS.INTERRUPT);
+    }
+}
+
+// 显示中断确认操作按钮
+function showInterruptActions() {
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'interrupt-actions';
+    actionsDiv.id = 'interruptActions';
+
+    actionsDiv.innerHTML = `
+        <div class="interrupt-prompt">工具执行已中断，请选择操作：</div>
+        <div class="interrupt-buttons">
+            <button class="interrupt-btn interrupt-approve" data-response="${HUMAN_RESPONSE.APPROVE}">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3,8 7,12 13,4"/>
+                </svg>
+                同意执行
+            </button>
+            <button class="interrupt-btn interrupt-edit" data-response="${HUMAN_RESPONSE.EDIT}">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11,2 L14,5 L5,14 L2,14 L2,11 Z"/>
+                </svg>
+                编辑后执行
+            </button>
+            <button class="interrupt-btn interrupt-reject" data-response="${HUMAN_RESPONSE.REJECT}">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/>
+                </svg>
+                拒绝执行
+            </button>
+        </div>
+        <div class="interrupt-edit-area hidden" id="interruptEditArea">
+            <textarea class="interrupt-edit-input" id="interruptEditInput" placeholder="请输入修改内容..."></textarea>
+            <button class="interrupt-btn interrupt-confirm" id="interruptEditConfirm">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3,8 7,12 13,4"/>
+                </svg>
+                确认发送
+            </button>
+        </div>
+    `;
+
+    elements.chatContainer.appendChild(actionsDiv);
+    scrollToBottom();
+
+    // 绑定按钮事件
+    actionsDiv.querySelectorAll('.interrupt-btn[data-response]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const response = parseInt(btn.dataset.response);
+            if (response === HUMAN_RESPONSE.EDIT) {
+                // 显示编辑区域
+                const editArea = document.getElementById('interruptEditArea');
+                editArea.classList.remove('hidden');
+                document.getElementById('interruptEditInput').focus();
+                // 隐藏三个按钮
+                actionsDiv.querySelector('.interrupt-buttons').classList.add('hidden');
+                scrollToBottom();
+            } else {
+                sendHumanResponse(response, '');
+            }
+        });
+    });
+
+    // 编辑确认按钮
+    const confirmBtn = actionsDiv.querySelector('#interruptEditConfirm');
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', () => {
+            const editInput = document.getElementById('interruptEditInput');
+            const editContent = editInput.value.trim();
+            if (!editContent) {
+                showNotification('请输入修改内容');
+                return;
+            }
+            sendHumanResponse(HUMAN_RESPONSE.EDIT, editContent);
+        });
+    }
+}
+
+// 发送人工响应
+function sendHumanResponse(humanResponse, prompt) {
+    // 移除中断操作按钮
+    const actionsDiv = document.getElementById('interruptActions');
+    if (actionsDiv) {
+        actionsDiv.remove();
+    }
+
+    // 显示用户的选择
+    const responseLabels = {
+        [HUMAN_RESPONSE.APPROVE]: '✅ 同意执行',
+        [HUMAN_RESPONSE.EDIT]: '✏️ 编辑后执行',
+        [HUMAN_RESPONSE.REJECT]: '❌ 拒绝执行'
+    };
+    let userMsg = responseLabels[humanResponse] || '未知操作';
+    if (prompt) {
+        userMsg += '：' + prompt;
+    }
+    appendMessage('user', userMsg);
+
+    // 重置中断状态
+    state.pendingInterrupt = false;
+
+    // 禁用输入
+    setStreamingState(true);
+    showThinkingIndicator();
+
+    // 建立新的 SSE 连接，携带 humanResponse 参数
+    connectSSEWithHumanResponse(prompt, humanResponse);
+}
+
+// 建立带 humanResponse 参数的 SSE 连接
+function connectSSEWithHumanResponse(prompt, humanResponse) {
+    cleanup();
+
+    const sessionId = state.currentSessionId;
+    let url = `/stream/mem/agent?sessionId=${encodeURIComponent(sessionId)}&humanResponse=${humanResponse}`;
+    if (prompt) {
+        url += `&prompt=${encodeURIComponent(prompt)}`;
+    }
+
+    try {
+        const eventSource = new EventSource(url);
+        state.eventSource = eventSource;
+
+        eventSource.onopen = () => {
+            console.log('SSE 连接已建立（人工响应）');
+        };
+
+        eventSource.addEventListener(SSE_EVENTS.MODEL, (event) => {
+            handleModelEvent(event.data);
+        });
+
+        eventSource.addEventListener(SSE_EVENTS.TOOL, (event) => {
+            handleToolEvent(event.data);
+        });
+
+        eventSource.addEventListener(SSE_EVENTS.THINKING, (event) => {
+            handleThinkingEvent(event.data);
+        });
+
+        eventSource.addEventListener(SSE_EVENTS.CONTEXT, (event) => {
+            handleContextEvent(event.data);
+        });
+
+        eventSource.addEventListener(SSE_EVENTS.COMPLETE, (event) => {
+            handleCompleteEvent(event.data);
+            cleanup();
+        });
+
+        eventSource.addEventListener(SSE_EVENTS.ERROR, (event) => {
+            handleErrorEvent(event.data);
+            cleanup();
+        });
+
+        eventSource.addEventListener(SSE_EVENTS.TIMEOUT, (event) => {
+            handleTimeoutEvent(event.data);
+            cleanup();
+        });
+
+        eventSource.addEventListener(SSE_EVENTS.INTERRUPT, (event) => {
+            handleInterruptEvent(event.data);
+        });
+
+        eventSource.onerror = (error) => {
+            console.error('SSE 连接错误:', error);
+            removeThinkingIndicator();
+            setStreamingState(false);
+            if (eventSource.readyState === EventSource.CLOSED) {
+                console.log('SSE 连接已关闭');
+            }
+            cleanup();
+        };
+
+    } catch (error) {
+        console.error('创建 SSE 连接失败:', error);
+        removeThinkingIndicator();
+        setStreamingState(false);
+        appendMessage('assistant', '', SSE_EVENTS.ERROR, '连接失败，请重试');
+    }
 }
 
 // ==================== 消息显示 ====================
@@ -506,7 +713,8 @@ function getEventClass(eventType) {
         [SSE_EVENTS.COMPLETE]: 'event-complete',
         [SSE_EVENTS.ERROR]: 'event-error',
         [SSE_EVENTS.CONTEXT]: 'event-context',
-        [SSE_EVENTS.TIMEOUT]: 'event-timeout'
+        [SSE_EVENTS.TIMEOUT]: 'event-timeout',
+        [SSE_EVENTS.INTERRUPT]: 'event-interrupt'
     };
     return eventClasses[eventType] || 'event-model';
 }

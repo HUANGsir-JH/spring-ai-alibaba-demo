@@ -545,6 +545,127 @@ body {
     border: 1px solid rgba(234, 179, 8, 0.2);
 }
 
+.event-interrupt {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* ==================== 中断操作 UI ==================== */
+.interrupt-actions {
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1px solid #fbbf24;
+    border-radius: var(--radius-lg);
+    animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.interrupt-prompt {
+    font-size: 14px;
+    font-weight: 600;
+    color: #92400e;
+    margin-bottom: 12px;
+}
+
+.interrupt-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.interrupt-buttons.hidden {
+    display: none;
+}
+
+.interrupt-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-sm);
+}
+
+.interrupt-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.interrupt-btn:active {
+    transform: translateY(0);
+}
+
+.interrupt-approve {
+    background: #10b981;
+    color: #ffffff;
+}
+
+.interrupt-approve:hover {
+    background: #059669;
+}
+
+.interrupt-edit {
+    background: #3b82f6;
+    color: #ffffff;
+}
+
+.interrupt-edit:hover {
+    background: #2563eb;
+}
+
+.interrupt-reject {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+.interrupt-reject:hover {
+    background: #dc2626;
+}
+
+.interrupt-confirm {
+    background: #10b981;
+    color: #ffffff;
+    margin-top: 10px;
+}
+
+.interrupt-confirm:hover {
+    background: #059669;
+}
+
+.interrupt-edit-area {
+    margin-top: 12px;
+}
+
+.interrupt-edit-area.hidden {
+    display: none;
+}
+
+.interrupt-edit-input {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px 14px;
+    border: 1px solid #fbbf24;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-family: inherit;
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+    background: #ffffff;
+    color: var(--text-primary);
+    transition: border-color 0.2s;
+}
+
+.interrupt-edit-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
 /* Markdown 样式 */
 .message-bubble .markdown-content {
     line-height: 1.7;
