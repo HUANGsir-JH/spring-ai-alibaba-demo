@@ -5,9 +5,11 @@ import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatModel;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import com.alibaba.cloud.ai.graph.NodeOutput;
 import com.alibaba.cloud.ai.graph.RunnableConfig;
+import com.alibaba.cloud.ai.graph.action.InterruptionMetadata;
 import com.alibaba.cloud.ai.graph.agent.ReactAgent;
 import com.alibaba.cloud.ai.graph.agent.hook.hip.HumanInTheLoopHook;
 import com.alibaba.cloud.ai.graph.agent.hook.hip.ToolConfig;
+import com.alibaba.cloud.ai.graph.agent.tools.ShellTool;
 import com.alibaba.cloud.ai.graph.checkpoint.savers.MemorySaver;
 import com.alibaba.cloud.ai.graph.checkpoint.savers.redis.RedisSaver;
 import com.alibaba.cloud.ai.graph.streaming.OutputType;
@@ -20,6 +22,7 @@ import org.huang.saademo.hook.MessageManageHook;
 import org.huang.saademo.hook.TimeRecordAgentHook;
 import org.huang.saademo.interceptor.TimeRecordModelInterceptor;
 import org.huang.saademo.interceptor.ToolRecordInterceptor;
+import org.huang.saademo.manager.InterruptMetadataManager;
 import org.huang.saademo.manager.SSEManager;
 import org.huang.saademo.tools.TimeTool;
 import org.huang.saademo.tools.WeatherSearchTool;
@@ -27,11 +30,13 @@ import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
+import org.springframework.ai.tool.ToolCallback;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.publisher.Flux;
 
+import java.util.List;
 import java.util.UUID;
 
 
@@ -65,22 +70,41 @@ public class StreamMemService {
     @Resource
     private MessageManageHook messageManageHook;
     
-    public void streamCall(String prompt, String sessionId) {
+    @Resource
+    private InterruptMetadataManager metadataManager;
+    
+    public void streamCall(String prompt, String sessionId, Integer humanResponse) {
         ReactAgent agent = createAgent();
         
-//        String threadId = UUID.randomUUID().toString();
+        InterruptionMetadata humanDecision = null;
         
-        RunnableConfig config = RunnableConfig.builder()
+        if(humanResponse!=null){
+            InterruptionMetadata metadata = metadataManager.get(sessionId);
+            if(humanResponse.equals(Constants.TOOL_APPROVE)){
+                humanDecision = approveAll(metadata);
+            }else if(humanResponse.equals(Constants.TOOL_EDIT)){
+                // todo 编辑功能需要前端提供编辑界面，用户编辑后将修改后的结果传回后端，这个过程比较复杂，后续再完善，当前仅传递edit这个状态。
+                humanDecision = edit(metadata);
+            }else if(humanResponse.equals(Constants.TOOL_REJECT)) {
+                humanDecision = rejectAll(metadata);
+            }
+            metadataManager.remove(sessionId); // 处理完毕后移除metadata，避免内存泄漏
+        }
+        
+        RunnableConfig.Builder configBuilder = RunnableConfig.builder()
                 .threadId(sessionId)
-                .addMetadata("user_id", "hjh")
-                .build();
+                .addMetadata("user_id", "hjh");
+        
+        if(humanDecision!=null){
+            configBuilder.addMetadata(RunnableConfig.HUMAN_FEEDBACK_METADATA_KEY, humanDecision);
+        }
         
         SseEmitter emitter = sseManager.getEmitter(sessionId);
         
         try{
             executor.submit(()->{
                 try{
-                    Flux<NodeOutput> stream = agent.stream(prompt, config);
+                    Flux<NodeOutput> stream = agent.stream(prompt, configBuilder.build());
                     stream.subscribe(output ->{
                         if(output instanceof StreamingOutput modelResponse){
                             OutputType type = modelResponse.getOutputType();
@@ -106,6 +130,15 @@ public class StreamMemService {
                                 }
                                 default -> log.info("Other streaming type: {}, message: {}", type, message==null?"[No Text]":message.getText());
                             }
+                        }else if(output instanceof InterruptionMetadata metadata){
+                            List<InterruptionMetadata.ToolFeedback> toolFeedbacks = metadata.toolFeedbacks();
+                            toolFeedbacks.forEach(feedback->{
+                                String info = "[Tool]: " + feedback.getName() + ", [Id]: " + feedback.getId() + ", [Arguments]: "
+                                        + feedback.getArguments() + ", [Description]: " + feedback.getDescription() + ", [Result]: "
+                                        + feedback.getResult();
+                                sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_INTERRUPT, info);
+                            });
+                            metadataManager.put(sessionId, metadata); // 存储中断元数据，等待前端批准后使用
                         }
                     }, error ->{
                         log.error("Error in streaming: ", error);
@@ -140,7 +173,9 @@ public class StreamMemService {
         RedisSaver redisSaver = RedisSaver.builder()
                 .redisson(redissonClient).build();
         
-        // 配置Human-in-the-loop Hook，暂时不加入agent中使用
+        // 配置Human-in-the-loop Hook，当调用getCurrentTime工具时需要人工批准
+        // 我咋感觉这功能那么难用呢？如果要用户介入处理，就需要在前端展示一个批准界面，用户批准后再把批准结果传回后端，这个过程中还要维护好metadata的状态，不然就很麻烦了
+        // todo 后续完善人机交互式批准功能,但是批准又需要metadata，得考虑如何在sse结束后保存这个metadata
         HumanInTheLoopHook human = HumanInTheLoopHook.builder().approvalOn("getCurrentTime",
                 ToolConfig.builder()
                         .description("Get the current time need human approval")
@@ -149,7 +184,7 @@ public class StreamMemService {
         ReactAgent agent = ReactAgent.builder()
                 .name("chat-agent")
                 .model(chatModel)
-                .hooks(timeRecordAgentHook, messageManageHook)
+                .hooks(timeRecordAgentHook, messageManageHook, human)
                 .systemPrompt("你是一个乐于助人的智能助理，请根据用户的提问提供准确且有帮助的回答。")
                 .interceptors(timeRecordModelInterceptor,toolRecordInterceptor)
                 .methodTools(new TimeTool(), new WeatherSearchTool())
@@ -159,24 +194,69 @@ public class StreamMemService {
         return agent;
     }
     
-    private void sendEvent(SseEmitter emitter, String name, String data){
-        try {
-            emitter.send(SseEmitter.event().name(name).data(data));
-        } catch (IllegalStateException e) {
-            // 如果连接已关闭，则不再尝试发送错误信息
-            if (e.getMessage().contains("already completed")) {
-                log.warn("SSE connection already closed, skipping event: {}", data);
-            } else {
-                log.error("SSE connection error", e);
+    private InterruptionMetadata approveAll(InterruptionMetadata metadata){
+        InterruptionMetadata.Builder builder = InterruptionMetadata.builder().nodeId(metadata.node()).state(metadata.state());
+        
+        metadata.toolFeedbacks().forEach(feedback->{
+            builder.addToolFeedback(
+                    InterruptionMetadata.ToolFeedback.builder(feedback)
+                            .result(InterruptionMetadata.ToolFeedback.FeedbackResult.APPROVED)
+                            .build()
+            );
+        });
+        
+        return builder.build();
+    }
+    
+    private InterruptionMetadata rejectAll(InterruptionMetadata metadata){
+        InterruptionMetadata.Builder builder = InterruptionMetadata.builder().nodeId(metadata.node()).state(metadata.state());
+        
+        metadata.toolFeedbacks().forEach(feedback->{
+            builder.addToolFeedback(
+                    InterruptionMetadata.ToolFeedback.builder(feedback)
+                            .result(InterruptionMetadata.ToolFeedback.FeedbackResult.REJECTED)
+                            .build()
+            );
+        });
+        
+        return builder.build();
+    }
+    
+    private InterruptionMetadata edit(InterruptionMetadata metadata){
+        InterruptionMetadata.Builder builder = InterruptionMetadata.builder().nodeId(metadata.node()).state(metadata.state());
+        
+        metadata.toolFeedbacks().forEach(feedback->{
+            builder.addToolFeedback(
+                    InterruptionMetadata.ToolFeedback.builder(feedback)
+                            .result(InterruptionMetadata.ToolFeedback.FeedbackResult.EDITED)
+                            .build()
+            );
+        });
+        
+        return builder.build();
+    }
+    
+    private InterruptionMetadata edit(InterruptionMetadata metadata, String toolName, String newArguments){
+        InterruptionMetadata.Builder builder = InterruptionMetadata.builder().nodeId(metadata.node()).state(metadata.state());
+        
+        metadata.toolFeedbacks().forEach(feedback->{
+            if(feedback.getName().equals(toolName)){
+                builder.addToolFeedback(
+                        InterruptionMetadata.ToolFeedback.builder(feedback)
+                                .arguments(newArguments)
+                                .result(InterruptionMetadata.ToolFeedback.FeedbackResult.EDITED)
+                                .build()
+                );
+            }else{
+                builder.addToolFeedback(
+                        InterruptionMetadata.ToolFeedback.builder(feedback)
+                                .result(InterruptionMetadata.ToolFeedback.FeedbackResult.REJECTED)
+                                .build()
+                );
             }
-        } catch (Exception e) {
-            log.error("Error sending SSE event", e);
-            try {
-                emitter.completeWithError(e);
-            } catch (Exception ex) {
-                log.error("Failed to complete emitter with error", ex);
-            }
-        }
+        });
+        
+        return builder.build();
     }
     
 }

@@ -8,4 +8,12 @@ public class Constants {
     public static final String SSE_EVENT_THINKING = "[THINKING]"; // 事件类型：思考
     public static final String SSE_EVENT_CONTEXT = "[CONTEXT]"; // 事件类型：压缩上下文
     public static final String SSE_EVENT_TIMEOUT = "[TIMEOUT]"; // 事件类型：超时
+    public static final String SSE_EVENT_INTERRUPT = "[INTERRUPT]"; // 事件类型：中断
+    
+    // 工具使用：批准
+    public static final Integer TOOL_APPROVE = 0;
+    // 工具使用：编辑
+    public static final Integer TOOL_EDIT = 1;
+    // 工具使用：拒绝
+    public static final Integer TOOL_REJECT = 2;
 }
