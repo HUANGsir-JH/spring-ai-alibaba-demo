@@ -8,8 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class InterruptMetadataManager {
     // 使用 final 确保引用不可变
-    private final ConcurrentHashMap<String, InterruptionMetadata> metadataMap =
-            new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, InterruptionMetadata> metadataMap = new ConcurrentHashMap<>();
     
     // 简单的 put/get/remove 操作
     public void put(String threadId, InterruptionMetadata metadata) {
