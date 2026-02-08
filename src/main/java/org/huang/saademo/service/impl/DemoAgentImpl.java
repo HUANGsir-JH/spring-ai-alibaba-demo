@@ -14,6 +14,7 @@ import com.alibaba.cloud.ai.graph.exception.GraphRunnerException;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.huang.saademo.config.ApiKeyConfig;
+import org.huang.saademo.response.ai.AIResponseFormat;
 import org.huang.saademo.service.DemoAgent;
 import org.huang.saademo.tools.UserLocationTool;
 import org.huang.saademo.tools.WeatherSearchTool;
@@ -63,6 +64,7 @@ public class DemoAgentImpl implements DemoAgent {
                 .hooks(hook,human)
                 .systemPrompt("You are a helpful assistant that provides weather information using the weather search tool.")
                 .saver(new MemorySaver())
+//                .outputType(AIResponseFormat.class) // 控制模型进行结构化输出
                 .build();
         
         Optional<OverAllState> res = agent.invoke(input);
