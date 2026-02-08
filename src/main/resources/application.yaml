@@ -10,10 +10,10 @@ spring:
 
   ai:
     dashscope:
-      api-key: sk-b3458569b7bd45708834fdfc06210519
+      api-key: ${qwenKey}
 
 apikey:
-  qwenKey: sk-b3458569b7bd45708834fdfc06210519
+  qwenKey: ${qwenKey}
 
 
 server:
