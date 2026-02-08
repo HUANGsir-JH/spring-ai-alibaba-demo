@@ -14,6 +14,7 @@ import com.alibaba.cloud.ai.graph.checkpoint.savers.MemorySaver;
 import com.alibaba.cloud.ai.graph.checkpoint.savers.redis.RedisSaver;
 import com.alibaba.cloud.ai.graph.streaming.OutputType;
 import com.alibaba.cloud.ai.graph.streaming.StreamingOutput;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.huang.saademo.common.Constants;
@@ -26,6 +27,7 @@ import org.huang.saademo.manager.InterruptMetadataManager;
 import org.huang.saademo.manager.SSEManager;
 import org.huang.saademo.tools.TimeTool;
 import org.huang.saademo.tools.WeatherSearchTool;
+import org.huang.saademo.util.JsonParseUtil;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.springframework.ai.chat.messages.Message;
@@ -115,7 +117,9 @@ public class StreamMemService {
                                 case AGENT_MODEL_STREAMING -> {
                                     Object thinkContent = message.getMetadata().get("reasoningContent");
                                     if(thinkContent!=null && !thinkContent.toString().isEmpty()){ // 有思考内容
-                                        sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_THINKING, thinkContent.toString());
+                                        // 对思考内容进行JSON安全处理
+                                        String cleanThinkContent = safeProcessJsonContent(thinkContent.toString());
+                                        sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_THINKING, cleanThinkContent);
                                     }else{ // 纯模型输出
                                         sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_MODEL, message.getText());
                                     }
@@ -125,11 +129,18 @@ public class StreamMemService {
                                     if(message instanceof ToolResponseMessage tool){
                                         tool.getResponses().forEach(response->{
                                             String toolOutput = "id: "+response.id()+", name: "+response.name()+", data: "+ response.responseData();
-                                            sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_TOOL, toolOutput);
+                                            // 对工具响应数据进行JSON安全处理
+                                            String cleanToolOutput = safeProcessJsonContent(toolOutput);
+                                            sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_TOOL, cleanToolOutput);
                                         });
                                     }
                                 }
-                                default -> log.info("Other streaming type: {}, message: {}", type, message==null?"[No Text]":message.getText());
+                                default -> {
+                                    String messageText = message == null ? "[No Text]" : message.getText();
+                                    // 对默认消息进行JSON安全处理
+                                    String cleanMessageText = safeProcessJsonContent(messageText);
+                                    log.info("Other streaming type: {}, message: {}", type, cleanMessageText);
+                                }
                             }
                         }else if(output instanceof InterruptionMetadata metadata){
                             List<InterruptionMetadata.ToolFeedback> toolFeedbacks = metadata.toolFeedbacks();
@@ -137,13 +148,17 @@ public class StreamMemService {
                                 String info = "[Tool]: " + feedback.getName() + ", [Id]: " + feedback.getId() + ", [Arguments]: "
                                         + feedback.getArguments() + ", [Description]: " + feedback.getDescription() + ", [Result]: "
                                         + feedback.getResult();
-                                sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_INTERRUPT, info);
+                                // 对反馈信息进行JSON安全处理
+                                String cleanInfo = safeProcessJsonContent(info);
+                                sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_INTERRUPT, cleanInfo);
                             });
                             metadataManager.put(sessionId, metadata); // 存储中断元数据，等待前端批准后使用
                         }
                     }, error ->{
                         log.error("Error in streaming: ", error);
-                        sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_ERROR, "An error occurred: " + error.getMessage());
+                        // 对错误信息进行JSON安全处理
+                        String cleanErrorMessage = safeProcessJsonContent("An error occurred: " + error.getMessage());
+                        sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_ERROR, cleanErrorMessage);
                         emitter.completeWithError(error);
                     }, ()->{
                         sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_COMPLETE, "Stream completed");
@@ -151,16 +166,49 @@ public class StreamMemService {
                     });
                 }catch (Exception e){
                     log.error("Error during streaming call", e);
-                    sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_ERROR, "An error occurred: " + e.getMessage());
+                    // 对异常信息进行JSON安全处理
+                    String cleanExceptionMessage = safeProcessJsonContent("An error occurred: " + e.getMessage());
+                    sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_ERROR, cleanExceptionMessage);
                     emitter.completeWithError(e);
                 }
             });
         } catch (Exception e) {
             log.error("Error submitting task to executor", e);
-            sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_ERROR, "An error occurred: " + e.getMessage());
+            // 对提交错误信息进行JSON安全处理
+            String cleanSubmitErrorMessage = safeProcessJsonContent("An error occurred: " + e.getMessage());
+            sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_ERROR, cleanSubmitErrorMessage);
             emitter.completeWithError(e);
         }
         
+    }
+    
+    /**
+     * 安全处理JSON内容，防止解析错误
+     * @param content 原始内容
+     * @return 处理后的内容
+     */
+    private String safeProcessJsonContent(String content) {
+        if (content == null || content.isEmpty()) {
+            return "";
+        }
+        
+        try {
+            // 如果内容看起来像JSON，尝试清理和验证
+            if (content.trim().startsWith("{") || content.trim().startsWith("[")) {
+                String cleanedContent = JsonParseUtil.cleanJsonString(content);
+                if (JsonParseUtil.isValidJson(cleanedContent)) {
+                    return cleanedContent;
+                } else {
+                    // 如果清理后仍然无效，返回原始内容但移除危险字符
+                    return content.replaceAll("[\\x00-\\x1F&&[^\\r\\n\\t]]", "");
+                }
+            }
+            return content;
+        } catch (Exception e) {
+            log.warn("Failed to process JSON content safely: {}", e.getMessage());
+            // 发生异常时返回清理后的内容
+            return content.replaceAll("[\\x00-\\x1F&&[^\\r\\n\\t]]", "");
+        }
     }
     
     private ReactAgent createAgent(){

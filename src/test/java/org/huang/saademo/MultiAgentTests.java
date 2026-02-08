@@ -35,7 +35,7 @@ public class MultiAgentTests {
     
     @Test
     void testSupervisorAgentCall(){
-        String userInput = "请写一篇关于人工智能的简要博客，字数控制在100左右，要求内容翔实，结构清晰，最后总结一下人工智能的未来发展趋势。并且翻译成英文。";
+        String userInput = "帮我写一篇冬天的英文短诗，并且翻译为中文";
         multiAgentService.supervisorAgentCall(userInput);
     }
     

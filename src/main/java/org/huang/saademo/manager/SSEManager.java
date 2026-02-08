@@ -13,6 +13,19 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SSEManager {
     private Map<String, SseEmitter> sseHolder = new ConcurrentHashMap<>();
     
+    public SseEmitter createEmitter(){
+        SseEmitter emitter = new SseEmitter(10 * 60 * 1000L); // 10分钟超时
+        
+        emitter.onCompletion(() -> log.info("SSE completed"));
+        emitter.onTimeout(() -> {
+            log.warn("SSE timeout");
+            emitter.complete();
+        });
+        emitter.onError((e) -> log.error("SSE error: {}", e.getMessage()));
+        
+        return emitter;
+    }
+    
     public SseEmitter createEmitter(String sessionId) {
         SseEmitter emitter = new SseEmitter(10 * 60 * 1000L); // 10分钟超时
         

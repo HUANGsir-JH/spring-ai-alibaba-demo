@@ -10,30 +10,45 @@ import com.alibaba.cloud.ai.graph.agent.flow.agent.LlmRoutingAgent;
 import com.alibaba.cloud.ai.graph.agent.flow.agent.ParallelAgent;
 import com.alibaba.cloud.ai.graph.agent.flow.agent.SequentialAgent;
 import com.alibaba.cloud.ai.graph.agent.flow.agent.SupervisorAgent;
+import com.alibaba.cloud.ai.graph.agent.interceptor.ModelResponse;
 import com.alibaba.cloud.ai.graph.checkpoint.savers.MemorySaver;
 import com.alibaba.cloud.ai.graph.exception.GraphRunnerException;
+import com.alibaba.cloud.ai.graph.streaming.OutputType;
+import com.alibaba.cloud.ai.graph.streaming.StreamingOutput;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.huang.saademo.config.ApiKeyConfig;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class MultiAgentService {
     
     @Resource
     private ApiKeyConfig apiKeyConfig;
     
+    @Resource(name="stramAgentTaskExecutor")
+    private ThreadPoolTaskExecutor executor;
+    
     private static final String MODEL_NAME = "qwen3-max-2026-01-23";
     
-    /**
-     * 按照预先定义的流程顺序调用agent，先调用write-agent写文章，再调用review-agent审核文章，最后由主agent总结输出结果
-     * @param userInput 用户输入的写作要求
-     */
-    public void sequentialAgentCall(String userInput){
+    public record AgentOutput(String outputType, String agentName, String type, String text, Map<String, Object> metadata) {}
+    
+    private ObjectMapper objectMapper = new ObjectMapper();
+    
+    private SequentialAgent getSequentialAgent() {
         ChatModel chatModel = buildChatModel();
         
         ReactAgent writeAgent = buildWriteAgent(chatModel);
@@ -45,6 +60,15 @@ public class MultiAgentService {
                 .subAgents(List.of(writeAgent, reviewAgent)) // 按照顺序执行子 Agent，先执行 writeAgent，再执行 reviewAgent
                 .saver(new MemorySaver())
                 .build();
+        return sequentialAgent;
+    }
+    
+    /**
+     * 按照预先定义的流程顺序调用agent，先调用write-agent写文章，再调用review-agent审核文章，最后由主agent总结输出结果
+     * @param userInput 用户输入的写作要求
+     */
+    public void sequentialAgentCall(String userInput){
+        SequentialAgent sequentialAgent = getSequentialAgent();
         
         try {
             Optional<OverAllState> allState = sequentialAgent.invoke(userInput);
@@ -60,11 +84,51 @@ public class MultiAgentService {
         }
     }
     
-    /**
-     * 并行调用write-agent和poem-agent，最后由主agent总结输出结果
-     * @param userInput 用户输入的写作要求
-     */
-    public void parallelAgentCall(String userInput){
+    // 演示流式输出的内容。
+    public void sequentialAgentStreamCall(String userInput, SseEmitter emitter){
+        SequentialAgent sequentialAgent = getSequentialAgent();
+        
+        try{
+            executor.submit(()->{
+                try {
+                    Flux<NodeOutput> stream = sequentialAgent.stream(userInput);
+                    stream.subscribe(output->{
+                        if(output instanceof StreamingOutput modelOutput){
+                            OutputType type = modelOutput.getOutputType();
+                            // 如果要区分是哪个Agent的流式输出，可以在构建Agent的时候设置不同的name，然后通过modelOutput.agent()来获取当前输出属于哪个Agent。
+                            // 比如这里是subgraph_write-agent和subgraph_review-agent的流式输出，前面加上agentName区分一下。
+                            String agentName = modelOutput.agent();
+                            Message message = modelOutput.message();
+                            if(message!=null){
+                                // 这里只是简单地把流式输出的内容发送给前端，实际使用中可以根据 type 和 message 的内容进行更复杂的处理和展示。
+                                MessageType messageType = message.getMessageType();
+                                Map<String, Object> metadata = message.getMetadata();
+                                String text = message.getText();
+                                sendEvent(emitter,"[STREAMING_OUTPUT]", buildOutputJson(type.name(),agentName,messageType.getValue(),text,metadata));
+                            }
+                        }else{
+                            sendEvent(emitter,"[NODE_OUTPUT]",output.toString());
+                        }
+                    },(error)->{
+                        log.error("Error in stream execution", error);
+                        emitter.completeWithError(error);
+                    },()->{
+                        log.info("Stream execution completed");
+                        emitter.complete();
+                    });
+                } catch (GraphRunnerException e) {
+                    log.error("Error in stream execution", e);
+                    emitter.completeWithError(e);
+                }
+            });
+        } catch (Exception e) {
+            log.error("Error in sequentialAgentStreamCall", e);
+            emitter.completeWithError(e);
+        }
+        
+    }
+    
+    private ParallelAgent getParallelAgent() {
         ChatModel chatModel = buildChatModel();
         
         ReactAgent writeAgent = buildWriteAgent(chatModel);
@@ -79,6 +143,15 @@ public class MultiAgentService {
                 .mergeStrategy(new ParallelAgent.DefaultMergeStrategy()) // 自定义合并策略：实现ParallelAgent.MergeStrategy接口
                 .saver(new MemorySaver())
                 .build();
+        return parallelAgent;
+    }
+    
+    /**
+     * 并行调用write-agent和poem-agent，最后由主agent总结输出结果
+     * @param userInput 用户输入的写作要求
+     */
+    public void parallelAgentCall(String userInput){
+        ParallelAgent parallelAgent = getParallelAgent();
         
         try {
             Optional<OverAllState> allState = parallelAgent.invoke(userInput);
@@ -94,11 +167,48 @@ public class MultiAgentService {
         }
     }
     
-    /**
-     * 根据用户输入的内容，由大模型智能地路由到不同的agent处理。比如用户输入的是写作要求，就路由到write-agent；如果用户输入的是翻译要求，就路由到translation-agent。
-     * @param userInput
-     */
-    public void llmRoutingAgentCall(String userInput){
+    // 演示流式输出的内容。
+    public void parallelAgentStreamCall(String userInput, SseEmitter emitter){
+        ParallelAgent parallelAgent = getParallelAgent();
+        
+        try{
+            executor.submit(()->{
+                try {
+                    Flux<NodeOutput> stream = parallelAgent.stream(userInput);
+                    stream.subscribe(output->{
+                        if(output instanceof StreamingOutput modelOutput){
+                            OutputType type = modelOutput.getOutputType();
+                            String agentName = modelOutput.agent();
+                            Message message = modelOutput.message();
+                            // 并行模式下，多个Agent的流式输出会交错出现，所以需要通过 agentName 来区分是哪个Agent的输出。
+                            if(message!=null){
+                                MessageType messageType = message.getMessageType();
+                                Map<String, Object> metadata = message.getMetadata();
+                                String text = message.getText();
+                                sendEvent(emitter,"[STREAMING_OUTPUT]", buildOutputJson(type.name(),agentName,messageType.getValue(),text,metadata));
+                            }
+                        }else{
+                            sendEvent(emitter,"[NODE_OUTPUT]",output.toString());
+                        }
+                    },(error)->{
+                        log.error("Error in stream execution", error);
+                        emitter.completeWithError(error);
+                    },()->{
+                        log.info("Stream execution completed");
+                        emitter.complete();
+                    });
+                } catch (GraphRunnerException e) {
+                    log.error("Error in stream execution", e);
+                    emitter.completeWithError(e);
+                }
+            });
+        } catch (Exception e) {
+            log.error("Error in parallelAgentStreamCall", e);
+            emitter.completeWithError(e);
+        }
+    }
+    
+    private LlmRoutingAgent getLlmRoutingAgent() {
         ChatModel chatModel = buildChatModel();
         
         ReactAgent writeAgent = buildWriteAgent(chatModel);
@@ -124,6 +234,15 @@ public class MultiAgentService {
                 .subAgents(List.of(writeAgent, poemAgent, translationAgent))
                 .saver(new MemorySaver())
                 .build();
+        return routingAgent;
+    }
+    
+    /**
+     * 根据用户输入的内容，由大模型智能地路由到不同的agent处理。比如用户输入的是写作要求，就路由到write-agent；如果用户输入的是翻译要求，就路由到translation-agent。
+     * @param userInput
+     */
+    public void llmRoutingAgentCall(String userInput){
+        LlmRoutingAgent routingAgent = getLlmRoutingAgent();
         
         try {
             Optional<OverAllState> allState = routingAgent.invoke(userInput);
@@ -139,11 +258,47 @@ public class MultiAgentService {
         }
     }
     
-    /**
-     * 监督者Agent可以同时监控多个子Agent的执行，并且在子Agent执行完成后对它们的输出进行评审和反馈。比如在写文章的场景中，监督者Agent可以同时监控write-agent和translation-agent的执行，在它们完成后对写的文章和翻译的结果进行评审，给出改进建议或者指出错误。
-     * @param userInput 用户输入的内容，可能包含写作要求和翻译要求
-     */
-    public void supervisorAgentCall(String userInput){
+    public void llmRoutingAgentStreamCall(String userInput, SseEmitter emitter){
+        LlmRoutingAgent routingAgent = getLlmRoutingAgent();
+        
+        try{
+            executor.submit(()->{
+                try {
+                    Flux<NodeOutput> stream = routingAgent.stream(userInput);
+                    stream.subscribe(output->{
+                        if(output instanceof StreamingOutput modelOutput){
+                            OutputType type = modelOutput.getOutputType();
+                            String agentName = modelOutput.agent();
+                            Message message = modelOutput.message();
+                            // 路由模式下，只有被路由到的子Agent会有流式输出，观察到的agentName就是被路由到的那个Agent。
+                            if(message!=null){
+                                MessageType messageType = message.getMessageType();
+                                Map<String, Object> metadata = message.getMetadata();
+                                String text = message.getText();
+                                sendEvent(emitter,"[STREAMING_OUTPUT]", buildOutputJson(type.name(),agentName,messageType.getValue(),text,metadata));
+                            }
+                        }else{
+                            sendEvent(emitter,"[NODE_OUTPUT]",output.toString());
+                        }
+                    },(error)->{
+                        log.error("Error in stream execution", error);
+                        emitter.completeWithError(error);
+                    },()->{
+                        log.info("Stream execution completed");
+                        emitter.complete();
+                    });
+                } catch (GraphRunnerException e) {
+                    log.error("Error in stream execution", e);
+                    emitter.completeWithError(e);
+                }
+            });
+        } catch (Exception e) {
+            log.error("Error in llmRoutingAgentStreamCall", e);
+            emitter.completeWithError(e);
+        }
+    }
+    
+    private SupervisorAgent getSupervisorAgent() {
         ChatModel chatModel = buildChatModel();
         
         ReactAgent writeAgent = buildWriteAgent(chatModel);
@@ -173,6 +328,15 @@ public class MultiAgentService {
                 .subAgents(List.of(writeAgent, translationAgent))
                 .saver(new MemorySaver())
                 .build();
+        return supervisorAgent;
+    }
+    
+    /**
+     * 监督者Agent可以同时监控多个子Agent的执行，并且在子Agent执行完成后对它们的输出进行评审和反馈。比如在写文章的场景中，监督者Agent可以同时监控write-agent和translation-agent的执行，在它们完成后对写的文章和翻译的结果进行评审，给出改进建议或者指出错误。
+     * @param userInput 用户输入的内容，可能包含写作要求和翻译要求
+     */
+    public void supervisorAgentCall(String userInput){
+        SupervisorAgent supervisorAgent = getSupervisorAgent();
         
         try {
             Optional<OverAllState> allState = supervisorAgent.invoke(userInput);
@@ -187,6 +351,49 @@ public class MultiAgentService {
             throw new RuntimeException(e);
         }
         
+    }
+    
+    public void supervisorAgentStreamCall(String userInput, SseEmitter emitter){
+        SupervisorAgent supervisorAgent = getSupervisorAgent();
+        
+        try{
+            executor.submit(()->{
+                try {
+                    Flux<NodeOutput> stream = supervisorAgent.stream(userInput);
+                    stream.subscribe(output->{
+                        if(output instanceof StreamingOutput modelOutput){
+                            OutputType type = modelOutput.getOutputType();
+                            String agentName = modelOutput.agent();
+                            Message message = modelOutput.message();
+                            // 注意观察agentName，监管者模式下，agentName是监管者的名字，而不是子Agent的名字。
+                            // 比如这里是"supervisor-agent"，而不是"subgraph_write-agent"或者"subgraph_translation-agent"。
+                            if(message!=null){
+                                MessageType messageType = message.getMessageType();
+                                Map<String, Object> metadata = message.getMetadata();
+                                String text = message.getText();
+                                // ps：这里似乎由于AI输出的字符会导致json解析出错，但是内容却接收到了。
+                                // todo 已经提交issue，后续看官方回复。
+                                sendEvent(emitter,"[STREAMING_OUTPUT]", buildOutputJson(type.name(),agentName,messageType.getValue(),text,metadata));
+                            }
+                        }else{
+                            sendEvent(emitter,"[NODE_OUTPUT]",output.toString());
+                        }
+                    },(error)->{
+                        log.error("Error in stream execution", error);
+                        emitter.completeWithError(error);
+                    },()->{
+                        log.info("Stream execution completed");
+                        emitter.complete();
+                    });
+                } catch (GraphRunnerException e) {
+                    log.error("Error in stream execution", e);
+                    emitter.completeWithError(e);
+                }
+            });
+        } catch (Exception e) {
+            log.error("Error in supervisorAgentStreamCall", e);
+            emitter.completeWithError(e);
+        }
     }
     
     private ChatModel buildChatModel(){
@@ -249,5 +456,24 @@ public class MultiAgentService {
                 .model(chatModel)
                 .saver(new MemorySaver())
                 .build();
+    }
+    
+    private void sendEvent(SseEmitter emitter, String eventName, Object data){
+        try {
+            emitter.send(SseEmitter.event().name(eventName).data(data));
+        } catch (Exception e) {
+            log.error("Error sending SSE event", e);
+            emitter.completeWithError(e);
+        }
+    }
+    
+    private String buildOutputJson(String outputType, String agentName, String type,  String text, Map<String, Object> metadata) {
+        AgentOutput agentOutput = new AgentOutput(outputType, agentName,type, text, metadata);
+        try {
+            return objectMapper.writeValueAsString(agentOutput);
+        } catch (JsonProcessingException e) {
+            log.error("Error converting AgentOutput to JSON", e);
+            return "{}"; // 返回一个空的JSON对象作为默认值
+        }
     }
 }
