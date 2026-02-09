@@ -303,14 +303,7 @@ public class MultiAgentService {
         
         ReactAgent writeAgent = buildWriteAgent(chatModel);
         ReactAgent translationAgent = buildTranslationAgent(chatModel);
-        
-        String systemPrompt = "You are a helpful assistant that can write an article based on user input and translate the input into English. " +
-                "The available agents are: write-agent, translation-agent. " +
-                "If the input is a writing requirement, route to write-agent. " +
-                "If the input is a translation requirement, route to translation-agent.";
-        String instruction = "You are a supervisor agent that can oversee the execution of write-agent and translation-agent. " +
-                "You can get the output of the sub agents and give feedback on their performance. " +
-                "Now, you receive the content from the write-agent: {article}, and the content from the translation-agent: {translation}. Please review their outputs and give feedback if there is any mistake or improvement suggestion.";
+        ReactAgent mainAgent = buildMainAgent(chatModel);
         
         // 和llmRoutingAgent不同，SupervisorAgent会同时调用多个子Agent。
         // 子Agent执行完成后会返回监督者，监督者可以继续路由到其他Agent，实现多步骤任务处理
@@ -318,13 +311,13 @@ public class MultiAgentService {
         // 自动重试机制：内置重试机制（最多2次），确保路由决策的可靠性
         // 任务完成控制：监督者可以返回 FINISH 来结束任务流程
         // 嵌套使用：可以将 SupervisorAgent 作为 SequentialAgent 的子Agent，实现更复杂的工作流
+        
+        // ps：就目前的稳定想来看，个人感觉SupervisorAgent的表现可能不如预期，尤其是在复杂任务和多轮路由场景下，可能会出现路由错误或者无法正确结束任务的情况。
         SupervisorAgent supervisorAgent = SupervisorAgent.builder()
                 .name("supervisor-agent")
                 .model(chatModel)
-                .systemPrompt(systemPrompt)
-                .instruction(instruction)
                 .description("An agent that can supervise the execution of other agents and give feedback.")
-                .mainAgent(writeAgent) // 官方文档没写mainAgent，但是启动报错了，需要指定一个主Agent。
+                .mainAgent(mainAgent) // 版本更新后，使用mainAgent来做路由决策。
                 .subAgents(List.of(writeAgent, translationAgent))
                 .saver(new MemorySaver())
                 .build();
@@ -453,6 +446,27 @@ public class MultiAgentService {
                 .description("An agent that can translate the input into English.")
                 .instruction("You are a helpful assistant that can translate the input into English.")
                 .outputKey("translation")
+                .model(chatModel)
+                .saver(new MemorySaver())
+                .build();
+    }
+    
+    private ReactAgent buildMainAgent(ChatModel chatModel){
+        return ReactAgent.builder().name("main-agent")
+                .description("The main agent that can route to different agents based on the input.")
+                .instruction("用户的请求：{input}")
+                // 需要自己在系统提示词定义好mainAgent的输出格式，确保可以进行正确的路由决策
+                // 参见issue：https://github.com/alibaba/spring-ai-alibaba/issues/4266
+                .systemPrompt("""
+                        你是一个智能的内容处理监督者，需要根据用户的输入内容，智能地路由到最合适的子Agent去处理，并且可以多轮路由，直到任务完成。
+                        可用的子Agent：write-agent（写作）、translation-agent（翻译）
+                        ## 路由决策输出格式（仅在选择子Agent时适用）
+                        当且仅当需要做出路由决策（选择下一个要调用的子Agent或结束任务）时，请以 JSON 数组格式输出，供系统解析路由；此格式仅用于本次路由，不影响你在其他场景下的主要任务输出格式。
+                        - 选择单个子Agent 时输出: ["write-agent"] 或 ["translation-agent"]
+                        - 选择多个子Agent 并行时输出: ["write-agent", "translation-agent"]
+                        - 任务全部完成时输出: [] 或 ["FINISH"]
+                        合法元素仅限: write-agent、translation-agent、FINISH。做路由决策时只输出上述 JSON 数组，不要包含其他解释
+                        """)
                 .model(chatModel)
                 .saver(new MemorySaver())
                 .build();
