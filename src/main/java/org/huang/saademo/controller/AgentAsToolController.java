@@ -20,7 +20,7 @@ public class AgentAsToolController {
     @GetMapping("/tool")
     public SseEmitter multiToolAgentCall(String input){
         SseEmitter emitter = sseManager.createEmitter();
-        agentAsToolService.multiToolAgentCall(emitter, input);
+        agentAsToolService.multiToolAgentStreamCall(emitter, input);
         return emitter;
     }
     
