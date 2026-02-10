@@ -116,7 +116,6 @@ public class StreamMemService {
                                 case AGENT_MODEL_STREAMING -> {
                                     Object thinkContent = message.getMetadata().get("reasoningContent");
                                     if(thinkContent!=null && !thinkContent.toString().isEmpty()){ // 有思考内容
-                                        // 对思考内容进行JSON安全处理
                                         sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_THINKING, thinkContent.toString());
                                     }else{ // 纯模型输出
                                         sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_MODEL, message.getText());
@@ -127,14 +126,12 @@ public class StreamMemService {
                                     if(message instanceof ToolResponseMessage tool){
                                         tool.getResponses().forEach(response->{
                                             String toolOutput = "id: "+response.id()+", name: "+response.name()+", data: "+ response.responseData();
-                                            // 对工具响应数据进行JSON安全处理
                                             sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_TOOL, toolOutput);
                                         });
                                     }
                                 }
                                 default -> {
                                     String messageText = message == null ? "[No Text]" : message.getText();
-                                    // 对默认消息进行JSON安全处理
                                     log.info("Other streaming type: {}, message: {}", type, messageText);
                                 }
                             }
@@ -150,7 +147,6 @@ public class StreamMemService {
                         }
                     }, error ->{
                         log.error("Error in streaming: ", error);
-                        // 对错误信息进行JSON安全处理
                         sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_ERROR, error.getMessage());
                         emitter.completeWithError(error);
                     }, ()->{
@@ -159,14 +155,12 @@ public class StreamMemService {
                     });
                 }catch (Exception e){
                     log.error("Error during streaming call", e);
-                    // 对异常信息进行JSON安全处理
                     sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_ERROR, e.getMessage());
                     emitter.completeWithError(e);
                 }
             });
         } catch (Exception e) {
             log.error("Error submitting task to executor", e);
-            // 对提交错误信息进行JSON安全处理
             sseManager.sendEvent(emitter, sessionId, Constants.SSE_EVENT_ERROR, e.getMessage());
             emitter.completeWithError(e);
         }
