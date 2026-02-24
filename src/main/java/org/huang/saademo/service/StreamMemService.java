@@ -9,12 +9,9 @@ import com.alibaba.cloud.ai.graph.action.InterruptionMetadata;
 import com.alibaba.cloud.ai.graph.agent.ReactAgent;
 import com.alibaba.cloud.ai.graph.agent.hook.hip.HumanInTheLoopHook;
 import com.alibaba.cloud.ai.graph.agent.hook.hip.ToolConfig;
-import com.alibaba.cloud.ai.graph.agent.tools.ShellTool;
-import com.alibaba.cloud.ai.graph.checkpoint.savers.MemorySaver;
 import com.alibaba.cloud.ai.graph.checkpoint.savers.redis.RedisSaver;
 import com.alibaba.cloud.ai.graph.streaming.OutputType;
 import com.alibaba.cloud.ai.graph.streaming.StreamingOutput;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.huang.saademo.common.Constants;
@@ -27,18 +24,15 @@ import org.huang.saademo.manager.InterruptMetadataManager;
 import org.huang.saademo.manager.SSEManager;
 import org.huang.saademo.tools.TimeTool;
 import org.huang.saademo.tools.WeatherSearchTool;
-import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
-import org.springframework.ai.tool.ToolCallback;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
-import java.util.UUID;
 
 
 @Service
@@ -48,7 +42,7 @@ public class StreamMemService {
     @Resource
     private ApiKeyConfig apiKeyConfig;
     
-    @Resource(name="stramAgentTaskExecutor")
+    @Resource(name= "streamAgentTaskExecutor")
     private ThreadPoolTaskExecutor executor;
     
     @Resource

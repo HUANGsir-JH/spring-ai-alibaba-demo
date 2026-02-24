@@ -10,7 +10,6 @@ import com.alibaba.cloud.ai.graph.agent.flow.agent.LlmRoutingAgent;
 import com.alibaba.cloud.ai.graph.agent.flow.agent.ParallelAgent;
 import com.alibaba.cloud.ai.graph.agent.flow.agent.SequentialAgent;
 import com.alibaba.cloud.ai.graph.agent.flow.agent.SupervisorAgent;
-import com.alibaba.cloud.ai.graph.agent.interceptor.ModelResponse;
 import com.alibaba.cloud.ai.graph.checkpoint.savers.MemorySaver;
 import com.alibaba.cloud.ai.graph.exception.GraphRunnerException;
 import com.alibaba.cloud.ai.graph.streaming.OutputType;
@@ -39,7 +38,7 @@ public class MultiAgentService {
     @Resource
     private ApiKeyConfig apiKeyConfig;
     
-    @Resource(name="stramAgentTaskExecutor")
+    @Resource(name= "streamAgentTaskExecutor")
     private ThreadPoolTaskExecutor executor;
     
     private static final String MODEL_NAME = "qwen3-max-2026-01-23";

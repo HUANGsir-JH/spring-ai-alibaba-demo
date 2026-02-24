@@ -22,8 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.publisher.Flux;
 
-import java.util.Optional;
-
 @Service
 @Slf4j
 public class StreamAgent {
@@ -31,7 +29,7 @@ public class StreamAgent {
     @Resource
     private ApiKeyConfig apiKeyConfig;
     
-    @Resource(name="stramAgentTaskExecutor")
+    @Resource(name= "streamAgentTaskExecutor")
     private ThreadPoolTaskExecutor executor;
     
     private static final String MODEL_NAME = "qwen3-max-2026-01-23";

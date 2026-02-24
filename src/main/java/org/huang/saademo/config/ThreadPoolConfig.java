@@ -9,7 +9,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Configuration
 public class ThreadPoolConfig {
     
-    @Bean(name="stramAgentTaskExecutor")
+    @Bean(name= "streamAgentTaskExecutor")
     public ThreadPoolTaskExecutor taskExecutor(){
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(10);

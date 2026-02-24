@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.huang.saademo.config.ApiKeyConfig;
+import org.huang.saademo.interceptor.ToolRecordInterceptor;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
@@ -34,7 +35,7 @@ public class AgentAsToolService {
     @Resource
     private ApiKeyConfig apiKeyConfig;
     
-    @Resource(name="stramAgentTaskExecutor")
+    @Resource(name= "streamAgentTaskExecutor")
     private ThreadPoolTaskExecutor executor;
     
     private static final String MODEL_NAME = "qwen3-max-2026-01-23";
@@ -125,8 +126,10 @@ public class AgentAsToolService {
                 .description("这是一个多工具代理，包含写作工具和翻译工具。根据用户的输入内容，选择合适的工具进行处理。")
                 .instruction("你是一个多工具代理，用户会给你一个输入内容，你需要根据这个内容选择合适的工具进行处理。" +
                         "如果用户的输入内容是关于写作需求的，你需要使用写作工具生成文章内容；" +
-                        "如果用户的输入内容是关于翻译需求的，你需要使用翻译工具进行翻译。" )
+                        "如果用户的输入内容是关于翻译需求的，你需要使用翻译工具进行翻译。" +
+                        "调用工具时编写的json需要符合json的格式规范（字符串不要漏了双引号），确保工具能够正确解析输入参数。对于没有明确需求的输入，你需要根据输入内容进行合理的推断，选择合适的工具进行处理，生成符合用户需求的结果。")
                 .model(chatModel)
+                .interceptors(new ToolRecordInterceptor())
                 .tools(
                         AgentTool.getFunctionToolCallback(writeAgent),
                         AgentTool.getFunctionToolCallback(translateAgent)
