@@ -1,79 +1,30 @@
+2026-02-10T22:09:32.736+08:00  INFO 29112 --- [SAADemoApp] [nio-8888-exec-3] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-02-10T22:09:32.737+08:00  INFO 29112 --- [SAADemoApp] [nio-8888-exec-3] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-02-10T22:09:32.739+08:00  INFO 29112 --- [SAADemoApp] [nio-8888-exec-3] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2026-02-10T22:09:37.327+08:00  WARN 29112 --- [SAADemoApp] [oundedElastic-1] o.s.ai.tool.method.MethodToolCallback    : Conversion from JSON failed
 
-  .   ____          _            __ _ _
- /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
-( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
- \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
-  '  |____| .__|_| |_|_| |_\__, | / / / /
- =========|_|==============|___/=/_/_/_/
-
- :: Spring Boot ::               (v3.5.10)
-
-2026-02-08T22:26:22.455+08:00  INFO 33080 --- [SAADemoApp] [  restartedMain] org.huang.saademo.SaaDemoApplication     : Starting SaaDemoApplication using Java 22.0.2 with PID 33080 (D:\IDEA_project\SAADemo\target\classes started by 86131 in D:\IDEA_project\SAADemo)
-2026-02-08T22:26:22.459+08:00  INFO 33080 --- [SAADemoApp] [  restartedMain] org.huang.saademo.SaaDemoApplication     : No active profile set, falling back to 1 default profile: "default"
-2026-02-08T22:26:22.511+08:00  INFO 33080 --- [SAADemoApp] [  restartedMain] o.s.b.devtools.restart.ChangeableUrls    : The Class-Path manifest attribute in D:\Maven\repository\org\apache\opennlp\opennlp-tools\2.3.3\opennlp-tools-2.3.3.jar referenced one or more files that do not exist: file:/D:/Maven/repository/org/apache/opennlp/opennlp-tools/2.3.3/slf4j-api-1.7.36.jar
-2026-02-08T22:26:22.512+08:00  INFO 33080 --- [SAADemoApp] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2026-02-08T22:26:22.512+08:00  INFO 33080 --- [SAADemoApp] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2026-02-08T22:26:23.507+08:00  INFO 33080 --- [SAADemoApp] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8888 (http)
-2026-02-08T22:26:23.518+08:00  INFO 33080 --- [SAADemoApp] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-02-08T22:26:23.519+08:00  INFO 33080 --- [SAADemoApp] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.50]
-2026-02-08T22:26:23.571+08:00  INFO 33080 --- [SAADemoApp] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-02-08T22:26:23.572+08:00  INFO 33080 --- [SAADemoApp] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1059 ms
-2026-02-08T22:26:23.670+08:00  INFO 33080 --- [SAADemoApp] [  restartedMain] org.redisson.Version                     : Redisson 4.1.0
-2026-02-08T22:26:23.999+08:00  INFO 33080 --- [SAADemoApp] [isson-netty-1-5] o.redisson.connection.ConnectionsHolder  : 1 connections initialized for localhost/127.0.0.1:6379
-2026-02-08T22:26:24.134+08:00  INFO 33080 --- [SAADemoApp] [sson-netty-1-20] o.redisson.connection.ConnectionsHolder  : 24 connections initialized for localhost/127.0.0.1:6379
-2026-02-08T22:26:24.269+08:00  INFO 33080 --- [SAADemoApp] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
-2026-02-08T22:26:24.904+08:00  INFO 33080 --- [SAADemoApp] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
-2026-02-08T22:26:24.923+08:00  INFO 33080 --- [SAADemoApp] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8888 (http) with context path '/'
-2026-02-08T22:26:24.929+08:00  INFO 33080 --- [SAADemoApp] [  restartedMain] org.huang.saademo.SaaDemoApplication     : Started SaaDemoApplication in 3.284 seconds (process running for 3.942)
-2026-02-08T22:26:38.948+08:00  INFO 33080 --- [SAADemoApp] [nio-8888-exec-3] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-02-08T22:26:38.950+08:00  INFO 33080 --- [SAADemoApp] [nio-8888-exec-3] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-02-08T22:26:38.958+08:00  INFO 33080 --- [SAADemoApp] [nio-8888-exec-3] o.s.web.servlet.DispatcherServlet        : Completed initialization in 6 ms
-2026-02-08T22:26:39.468+08:00  INFO 33080 --- [SAADemoApp] [      SaaDemo-1] c.a.c.a.g.internal.node.ParallelNode     : Calculated core pool size: 32 (CPU cores: 16)
-2026-02-08T22:26:39.468+08:00  INFO 33080 --- [SAADemoApp] [      SaaDemo-1] c.a.c.a.g.internal.node.ParallelNode     : Calculated maximum pool size: 64 (CPU cores: 16)
-2026-02-08T22:26:39.468+08:00  INFO 33080 --- [SAADemoApp] [      SaaDemo-1] c.a.c.a.g.internal.node.ParallelNode     : Calculated queue capacity: 1000
-2026-02-08T22:26:40.116+08:00  INFO 33080 --- [SAADemoApp] [      SaaDemo-1] c.a.c.a.g.a.f.node.MainAgentNodeAction   : Invoking mainAgent 'write-agent' compiled graph with threadId: Optional[subgraph_write-agent]
-2026-02-08T22:26:47.443+08:00  WARN 33080 --- [SAADemoApp] [oundedElastic-1] c.a.c.a.g.a.f.node.MainAgentNodeAction   : Failed to parse JSON array strings from returned sub agent list of Main Agent output text: **Winter��s Whisper**  
-By Frost and Flame  
-
-Beneath a sky of softened gray,  
-The world grows hushed in white array.  
-Snowflakes drift like silent dreams,  
-Stitching earth with silver seams.  
-
-Bare trees stand in quiet grace,  
-Frost paints lace on every face.  
-The wind hums low a lullaby��  
-Winter breathes, and time drifts by.  
-
----
-
-**��֮����**  
-˪���� ��  
-
-�Ұײ��֮�£�  
-���ﾲĬ����ɴ��  
-ѩ��������Ȼ�䣬  
-���߷�ʹ���¡�  
-
-��֦���������ţ�  
-˪��Ϊ������ɴ��  
-�������ҡ��������  
-��Ϣ���£�ʱ���š�
-
-java.lang.IllegalStateException: Conversion from JSON to java.util.List failed
-	at org.springframework.ai.util.json.JsonParser.fromJson(JsonParser.java:67) ~[spring-ai-model-1.1.2.jar:1.1.2]
-	at com.alibaba.cloud.ai.graph.agent.flow.node.MainAgentNodeAction.parseJsonArrayOfStrings(MainAgentNodeAction.java:67) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
-	at com.alibaba.cloud.ai.graph.agent.flow.node.MainAgentNodeAction.extractRoutingFromMessages(MainAgentNodeAction.java:179) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
-	at com.alibaba.cloud.ai.graph.agent.flow.node.MainAgentNodeAction.processLastResponse(MainAgentNodeAction.java:147) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
-	at com.alibaba.cloud.ai.graph.agent.flow.node.MainAgentNodeAction.lambda$getGraphResponseFlux$2(MainAgentNodeAction.java:125) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
-	at reactor.core.publisher.FluxFlatMap$FlatMapMain.onNext(FluxFlatMap.java:388) ~[reactor-core-3.7.15.jar:3.7.15]
-	at reactor.core.publisher.DrainUtils.postCompleteDrain(DrainUtils.java:136) ~[reactor-core-3.7.15.jar:3.7.15]
-	at reactor.core.publisher.DrainUtils.postComplete(DrainUtils.java:187) ~[reactor-core-3.7.15.jar:3.7.15]
-	at reactor.core.publisher.FluxBuffer$BufferOverlappingSubscriber.onComplete(FluxBuffer.java:554) ~[reactor-core-3.7.15.jar:3.7.15]
-	at reactor.core.publisher.FluxConcatArray$ConcatArraySubscriber.onComplete(FluxConcatArray.java:209) ~[reactor-core-3.7.15.jar:3.7.15]
-	at reactor.core.publisher.Operators$MultiSubscriptionSubscriber.onComplete(Operators.java:2230) ~[reactor-core-3.7.15.jar:3.7.15]
-	at reactor.core.publisher.MonoFlatMapMany$FlatMapManyInner.onComplete(MonoFlatMapMany.java:261) ~[reactor-core-3.7.15.jar:3.7.15]
-	at reactor.core.publisher.FluxConcatArray$ConcatArraySubscriber.onComplete(FluxConcatArray.java:209) ~[reactor-core-3.7.15.jar:3.7.15]
+java.lang.IllegalStateException: Conversion from JSON to java.util.Map<java.lang.String, java.lang.Object> failed
+	at org.springframework.ai.util.json.JsonParser.fromJson(JsonParser.java:97) ~[spring-ai-model-1.1.2.jar:1.1.2]
+	at org.springframework.ai.tool.method.MethodToolCallback.extractToolArguments(MethodToolCallback.java:132) ~[spring-ai-model-1.1.2.jar:1.1.2]
+	at org.springframework.ai.tool.method.MethodToolCallback.call(MethodToolCallback.java:108) ~[spring-ai-model-1.1.2.jar:1.1.2]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeSyncTool(AgentToolNode.java:778) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeToolByType(AgentToolNode.java:649) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.lambda$executeToolCallWithInterceptors$4(AgentToolNode.java:569) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeToolCallWithInterceptors(AgentToolNode.java:577) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeToolCallWithInterceptors(AgentToolNode.java:511) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeToolCallsSequential(AgentToolNode.java:230) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.apply(AgentToolNode.java:171) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.action.AsyncNodeActionWithConfig.lambda$node_async$0(AsyncNodeActionWithConfig.java:41) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.executor.NodeExecutor.executeNode(NodeExecutor.java:123) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.executor.NodeExecutor.execute(NodeExecutor.java:85) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.executor.MainGraphExecutor.execute(MainGraphExecutor.java:108) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.executor.NodeExecutor.lambda$processGraphResponseFlux$14(NodeExecutor.java:475) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at reactor.core.publisher.FluxDefer.subscribe(FluxDefer.java:46) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.Flux.subscribe(Flux.java:8891) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxConcatArray$ConcatArraySubscriber.onComplete(FluxConcatArray.java:238) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxConcatArray.subscribe(FluxConcatArray.java:79) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.Flux.subscribe(Flux.java:8891) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxConcatArray$ConcatArraySubscriber.onComplete(FluxConcatArray.java:238) ~[reactor-core-3.7.15.jar:3.7.15]
 	at reactor.core.publisher.FluxFilter$FilterSubscriber.onComplete(FluxFilter.java:166) ~[reactor-core-3.7.15.jar:3.7.15]
 	at reactor.core.publisher.FluxMap$MapConditionalSubscriber.onComplete(FluxMap.java:275) ~[reactor-core-3.7.15.jar:3.7.15]
 	at reactor.core.publisher.FluxConcatArray$ConcatArraySubscriber.onComplete(FluxConcatArray.java:209) ~[reactor-core-3.7.15.jar:3.7.15]
@@ -111,25 +62,342 @@ java.lang.IllegalStateException: Conversion from JSON to java.util.List failed
 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) ~[na:na]
 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) ~[na:na]
 	at java.base/java.lang.Thread.run(Thread.java:1570) ~[na:na]
-Caused by: com.fasterxml.jackson.core.JsonParseException: Unexpected character ('*' (code 42)): expected a valid value (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
- at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1]
-	at com.fasterxml.jackson.core.JsonParser._constructReadException(JsonParser.java:2672) ~[jackson-core-2.19.4.jar:2.19.4]
-	at com.fasterxml.jackson.core.base.ParserMinimalBase._reportUnexpectedChar(ParserMinimalBase.java:742) ~[jackson-core-2.19.4.jar:2.19.4]
-	at com.fasterxml.jackson.core.json.ReaderBasedJsonParser._handleOddValue(ReaderBasedJsonParser.java:2054) ~[jackson-core-2.19.4.jar:2.19.4]
-	at com.fasterxml.jackson.core.json.ReaderBasedJsonParser.nextToken(ReaderBasedJsonParser.java:780) ~[jackson-core-2.19.4.jar:2.19.4]
-	at com.fasterxml.jackson.databind.ObjectMapper._initForReading(ObjectMapper.java:5066) ~[jackson-databind-2.19.4.jar:2.19.4]
-	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4969) ~[jackson-databind-2.19.4.jar:2.19.4]
+Caused by: com.fasterxml.jackson.core.JsonParseException: Unrecognized token '����': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 13]
+	at com.fasterxml.jackson.core.JsonParser._constructError(JsonParser.java:2596) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.JsonParser._constructReadException(JsonParser.java:2622) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.JsonParser._constructReadException(JsonParser.java:2630) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.base.ParserMinimalBase._reportError(ParserMinimalBase.java:830) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.json.ReaderBasedJsonParser._reportInvalidToken(ReaderBasedJsonParser.java:3017) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.json.ReaderBasedJsonParser._handleOddValue(ReaderBasedJsonParser.java:2051) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.json.ReaderBasedJsonParser.nextFieldName(ReaderBasedJsonParser.java:1000) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.deser.std.MapDeserializer._readAndBindStringKeyMap(MapDeserializer.java:596) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.deser.std.MapDeserializer.deserialize(MapDeserializer.java:450) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.deser.std.MapDeserializer.deserialize(MapDeserializer.java:31) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4979) ~[jackson-databind-2.19.4.jar:2.19.4]
 	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3895) ~[jackson-databind-2.19.4.jar:2.19.4]
-	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3863) ~[jackson-databind-2.19.4.jar:2.19.4]
-	at org.springframework.ai.util.json.JsonParser.fromJson(JsonParser.java:64) ~[spring-ai-model-1.1.2.jar:1.1.2]
-	... 49 common frames omitted
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3878) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at org.springframework.ai.util.json.JsonParser.fromJson(JsonParser.java:94) ~[spring-ai-model-1.1.2.jar:1.1.2]
+	... 57 common frames omitted
 
-2026-02-08T22:26:47.470+08:00  INFO 33080 --- [SAADemoApp] [oundedElastic-1] c.a.c.a.g.a.f.node.MainAgentNodeAction   : Failed to parse sub-agent names from last AssistantMessage text, routing to FINISH
-2026-02-08T22:26:47.472+08:00  INFO 33080 --- [SAADemoApp] [oundedElastic-1] .g.a.f.n.MainAgentToSupervisorEdgeAction : MainAgentToSupervisorEdgeAction: routing to END as value for key 'supervisor_next' is finish or empty: [FINISH]
-2026-02-08T22:26:47.504+08:00  INFO 33080 --- [SAADemoApp] [oundedElastic-1] o.h.saademo.service.MultiAgentService    : Stream execution completed
-2026-02-08T22:26:47.525+08:00  INFO 33080 --- [SAADemoApp] [nio-8888-exec-2] org.huang.saademo.manager.SSEManager     : SSE completed
-2026-02-08T22:26:53.931+08:00  INFO 33080 --- [SAADemoApp] [r-shutdown-hook] c.a.c.a.g.internal.node.ParallelNode     : Shutting down ParallelNode default executor
-2026-02-08T22:26:53.931+08:00  INFO 33080 --- [SAADemoApp] [r-shutdown-hook] c.a.c.a.g.internal.node.ParallelNode     : ParallelNode default thread pool terminated
-2026-02-08T22:26:53.933+08:00  INFO 33080 --- [SAADemoApp] [r-shutdown-hook] c.a.c.a.g.internal.node.ParallelNode     : ParallelNode default executor shut down successfully
-2026-02-08T22:26:53.940+08:00  INFO 33080 --- [SAADemoApp] [ionShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
-2026-02-08T22:26:53.958+08:00  INFO 33080 --- [SAADemoApp] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-02-10T22:09:37.354+08:00 ERROR 29112 --- [SAADemoApp] [oundedElastic-1] c.a.c.ai.graph.agent.node.AgentToolNode  : Tool write-agent execution failed, handling with processor: org.springframework.ai.tool.execution.DefaultToolExecutionExceptionProcessor
+
+org.springframework.ai.tool.execution.ToolExecutionException: Unrecognized token '����': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 13]
+	at org.springframework.ai.tool.method.MethodToolCallback.extractToolArguments(MethodToolCallback.java:138) ~[spring-ai-model-1.1.2.jar:1.1.2]
+	at org.springframework.ai.tool.method.MethodToolCallback.call(MethodToolCallback.java:108) ~[spring-ai-model-1.1.2.jar:1.1.2]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeSyncTool(AgentToolNode.java:778) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeToolByType(AgentToolNode.java:649) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.lambda$executeToolCallWithInterceptors$4(AgentToolNode.java:569) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeToolCallWithInterceptors(AgentToolNode.java:577) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeToolCallWithInterceptors(AgentToolNode.java:511) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeToolCallsSequential(AgentToolNode.java:230) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.apply(AgentToolNode.java:171) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.action.AsyncNodeActionWithConfig.lambda$node_async$0(AsyncNodeActionWithConfig.java:41) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.executor.NodeExecutor.executeNode(NodeExecutor.java:123) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.executor.NodeExecutor.execute(NodeExecutor.java:85) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.executor.MainGraphExecutor.execute(MainGraphExecutor.java:108) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.executor.NodeExecutor.lambda$processGraphResponseFlux$14(NodeExecutor.java:475) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at reactor.core.publisher.FluxDefer.subscribe(FluxDefer.java:46) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.Flux.subscribe(Flux.java:8891) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxConcatArray$ConcatArraySubscriber.onComplete(FluxConcatArray.java:238) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxConcatArray.subscribe(FluxConcatArray.java:79) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.Flux.subscribe(Flux.java:8891) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxConcatArray$ConcatArraySubscriber.onComplete(FluxConcatArray.java:238) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxFilter$FilterSubscriber.onComplete(FluxFilter.java:166) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxMap$MapConditionalSubscriber.onComplete(FluxMap.java:275) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxConcatArray$ConcatArraySubscriber.onComplete(FluxConcatArray.java:209) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.Operators$MultiSubscriptionSubscriber.onComplete(Operators.java:2230) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxMap$MapSubscriber.onComplete(FluxMap.java:144) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxSwitchIfEmpty$SwitchIfEmptySubscriber.onComplete(FluxSwitchIfEmpty.java:85) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxFilter$FilterSubscriber.onComplete(FluxFilter.java:166) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxHandle$HandleConditionalSubscriber.onComplete(FluxHandle.java:440) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxMapFuseable$MapFuseableConditionalSubscriber.onComplete(FluxMapFuseable.java:350) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onComplete(FluxPeekFuseable.java:595) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onComplete(FluxPeekFuseable.java:595) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onComplete(FluxPeekFuseable.java:595) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onComplete(FluxPeekFuseable.java:595) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxHandleFuseable$HandleFuseableConditionalSubscriber.onComplete(FluxHandleFuseable.java:605) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onComplete(FluxContextWrite.java:126) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxDoFinally$DoFinallySubscriber.onComplete(FluxDoFinally.java:128) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onComplete(FluxPeekFuseable.java:940) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxMap$MapConditionalSubscriber.onComplete(FluxMap.java:275) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onComplete(FluxPeekFuseable.java:940) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onComplete(FluxPeekFuseable.java:940) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onComplete(FluxPeekFuseable.java:940) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onComplete(FluxPeekFuseable.java:940) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxHandle$HandleConditionalSubscriber.onComplete(FluxHandle.java:440) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onComplete(FluxContextWrite.java:126) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxDoFinally$DoFinallySubscriber.onComplete(FluxDoFinally.java:128) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onComplete(FluxPeekFuseable.java:595) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPublishOn$PublishOnConditionalSubscriber.doComplete(FluxPublishOn.java:1106) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPublishOn$PublishOnConditionalSubscriber.checkTerminated(FluxPublishOn.java:1140) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPublishOn$PublishOnConditionalSubscriber.runAsync(FluxPublishOn.java:996) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPublishOn$PublishOnConditionalSubscriber.run(FluxPublishOn.java:1079) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:84) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:37) ~[reactor-core-3.7.15.jar:3.7.15]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317) ~[na:na]
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) ~[na:na]
+	at java.base/java.lang.Thread.run(Thread.java:1570) ~[na:na]
+Caused by: com.fasterxml.jackson.core.JsonParseException: Unrecognized token '����': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 13]
+	at com.fasterxml.jackson.core.JsonParser._constructError(JsonParser.java:2596) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.JsonParser._constructReadException(JsonParser.java:2622) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.JsonParser._constructReadException(JsonParser.java:2630) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.base.ParserMinimalBase._reportError(ParserMinimalBase.java:830) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.json.ReaderBasedJsonParser._reportInvalidToken(ReaderBasedJsonParser.java:3017) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.json.ReaderBasedJsonParser._handleOddValue(ReaderBasedJsonParser.java:2051) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.json.ReaderBasedJsonParser.nextFieldName(ReaderBasedJsonParser.java:1000) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.deser.std.MapDeserializer._readAndBindStringKeyMap(MapDeserializer.java:596) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.deser.std.MapDeserializer.deserialize(MapDeserializer.java:450) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.deser.std.MapDeserializer.deserialize(MapDeserializer.java:31) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4979) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3895) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3878) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at org.springframework.ai.util.json.JsonParser.fromJson(JsonParser.java:94) ~[spring-ai-model-1.1.2.jar:1.1.2]
+	at org.springframework.ai.tool.method.MethodToolCallback.extractToolArguments(MethodToolCallback.java:132) ~[spring-ai-model-1.1.2.jar:1.1.2]
+	... 56 common frames omitted
+
+2026-02-10T22:09:37.381+08:00 ERROR 29112 --- [SAADemoApp] [oundedElastic-1] o.h.saademo.service.AgentAsToolService   : Agent stream error
+
+org.springframework.ai.tool.execution.ToolExecutionException: Unrecognized token '����': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 13]
+	at org.springframework.ai.tool.method.MethodToolCallback.extractToolArguments(MethodToolCallback.java:138) ~[spring-ai-model-1.1.2.jar:1.1.2]
+	at org.springframework.ai.tool.method.MethodToolCallback.call(MethodToolCallback.java:108) ~[spring-ai-model-1.1.2.jar:1.1.2]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeSyncTool(AgentToolNode.java:778) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeToolByType(AgentToolNode.java:649) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.lambda$executeToolCallWithInterceptors$4(AgentToolNode.java:569) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeToolCallWithInterceptors(AgentToolNode.java:577) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeToolCallWithInterceptors(AgentToolNode.java:511) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeToolCallsSequential(AgentToolNode.java:230) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.apply(AgentToolNode.java:171) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.action.AsyncNodeActionWithConfig.lambda$node_async$0(AsyncNodeActionWithConfig.java:41) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.executor.NodeExecutor.executeNode(NodeExecutor.java:123) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.executor.NodeExecutor.execute(NodeExecutor.java:85) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.executor.MainGraphExecutor.execute(MainGraphExecutor.java:108) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.executor.NodeExecutor.lambda$processGraphResponseFlux$14(NodeExecutor.java:475) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at reactor.core.publisher.FluxDefer.subscribe(FluxDefer.java:46) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.Flux.subscribe(Flux.java:8891) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxConcatArray$ConcatArraySubscriber.onComplete(FluxConcatArray.java:238) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxConcatArray.subscribe(FluxConcatArray.java:79) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.Flux.subscribe(Flux.java:8891) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxConcatArray$ConcatArraySubscriber.onComplete(FluxConcatArray.java:238) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxFilter$FilterSubscriber.onComplete(FluxFilter.java:166) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxMap$MapConditionalSubscriber.onComplete(FluxMap.java:275) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxConcatArray$ConcatArraySubscriber.onComplete(FluxConcatArray.java:209) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.Operators$MultiSubscriptionSubscriber.onComplete(Operators.java:2230) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxMap$MapSubscriber.onComplete(FluxMap.java:144) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxSwitchIfEmpty$SwitchIfEmptySubscriber.onComplete(FluxSwitchIfEmpty.java:85) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxFilter$FilterSubscriber.onComplete(FluxFilter.java:166) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxHandle$HandleConditionalSubscriber.onComplete(FluxHandle.java:440) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxMapFuseable$MapFuseableConditionalSubscriber.onComplete(FluxMapFuseable.java:350) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onComplete(FluxPeekFuseable.java:595) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onComplete(FluxPeekFuseable.java:595) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onComplete(FluxPeekFuseable.java:595) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onComplete(FluxPeekFuseable.java:595) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxHandleFuseable$HandleFuseableConditionalSubscriber.onComplete(FluxHandleFuseable.java:605) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onComplete(FluxContextWrite.java:126) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxDoFinally$DoFinallySubscriber.onComplete(FluxDoFinally.java:128) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onComplete(FluxPeekFuseable.java:940) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxMap$MapConditionalSubscriber.onComplete(FluxMap.java:275) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onComplete(FluxPeekFuseable.java:940) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onComplete(FluxPeekFuseable.java:940) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onComplete(FluxPeekFuseable.java:940) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onComplete(FluxPeekFuseable.java:940) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxHandle$HandleConditionalSubscriber.onComplete(FluxHandle.java:440) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onComplete(FluxContextWrite.java:126) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxDoFinally$DoFinallySubscriber.onComplete(FluxDoFinally.java:128) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onComplete(FluxPeekFuseable.java:595) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPublishOn$PublishOnConditionalSubscriber.doComplete(FluxPublishOn.java:1106) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPublishOn$PublishOnConditionalSubscriber.checkTerminated(FluxPublishOn.java:1140) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPublishOn$PublishOnConditionalSubscriber.runAsync(FluxPublishOn.java:996) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPublishOn$PublishOnConditionalSubscriber.run(FluxPublishOn.java:1079) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:84) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:37) ~[reactor-core-3.7.15.jar:3.7.15]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317) ~[na:na]
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) ~[na:na]
+	at java.base/java.lang.Thread.run(Thread.java:1570) ~[na:na]
+Caused by: com.fasterxml.jackson.core.JsonParseException: Unrecognized token '����': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 13]
+	at com.fasterxml.jackson.core.JsonParser._constructError(JsonParser.java:2596) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.JsonParser._constructReadException(JsonParser.java:2622) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.JsonParser._constructReadException(JsonParser.java:2630) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.base.ParserMinimalBase._reportError(ParserMinimalBase.java:830) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.json.ReaderBasedJsonParser._reportInvalidToken(ReaderBasedJsonParser.java:3017) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.json.ReaderBasedJsonParser._handleOddValue(ReaderBasedJsonParser.java:2051) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.json.ReaderBasedJsonParser.nextFieldName(ReaderBasedJsonParser.java:1000) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.deser.std.MapDeserializer._readAndBindStringKeyMap(MapDeserializer.java:596) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.deser.std.MapDeserializer.deserialize(MapDeserializer.java:450) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.deser.std.MapDeserializer.deserialize(MapDeserializer.java:31) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4979) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3895) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3878) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at org.springframework.ai.util.json.JsonParser.fromJson(JsonParser.java:94) ~[spring-ai-model-1.1.2.jar:1.1.2]
+	at org.springframework.ai.tool.method.MethodToolCallback.extractToolArguments(MethodToolCallback.java:132) ~[spring-ai-model-1.1.2.jar:1.1.2]
+	... 56 common frames omitted
+
+2026-02-10T22:09:37.416+08:00 ERROR 29112 --- [SAADemoApp] [nio-8888-exec-5] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] threw exception
+
+com.fasterxml.jackson.core.JsonParseException: Unrecognized token '����': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 13]
+	at com.fasterxml.jackson.core.JsonParser._constructError(JsonParser.java:2596) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.JsonParser._constructReadException(JsonParser.java:2622) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.JsonParser._constructReadException(JsonParser.java:2630) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.base.ParserMinimalBase._reportError(ParserMinimalBase.java:830) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.json.ReaderBasedJsonParser._reportInvalidToken(ReaderBasedJsonParser.java:3017) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.json.ReaderBasedJsonParser._handleOddValue(ReaderBasedJsonParser.java:2051) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.json.ReaderBasedJsonParser.nextFieldName(ReaderBasedJsonParser.java:1000) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.deser.std.MapDeserializer._readAndBindStringKeyMap(MapDeserializer.java:596) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.deser.std.MapDeserializer.deserialize(MapDeserializer.java:450) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.deser.std.MapDeserializer.deserialize(MapDeserializer.java:31) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4979) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3895) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3878) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at org.springframework.ai.util.json.JsonParser.fromJson(JsonParser.java:94) ~[spring-ai-model-1.1.2.jar:1.1.2]
+	at org.springframework.ai.tool.method.MethodToolCallback.extractToolArguments(MethodToolCallback.java:132) ~[spring-ai-model-1.1.2.jar:1.1.2]
+	at org.springframework.ai.tool.method.MethodToolCallback.call(MethodToolCallback.java:108) ~[spring-ai-model-1.1.2.jar:1.1.2]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeSyncTool(AgentToolNode.java:778) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeToolByType(AgentToolNode.java:649) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.lambda$executeToolCallWithInterceptors$4(AgentToolNode.java:569) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeToolCallWithInterceptors(AgentToolNode.java:577) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeToolCallWithInterceptors(AgentToolNode.java:511) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeToolCallsSequential(AgentToolNode.java:230) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.apply(AgentToolNode.java:171) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.action.AsyncNodeActionWithConfig.lambda$node_async$0(AsyncNodeActionWithConfig.java:41) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.executor.NodeExecutor.executeNode(NodeExecutor.java:123) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.executor.NodeExecutor.execute(NodeExecutor.java:85) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.executor.MainGraphExecutor.execute(MainGraphExecutor.java:108) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.executor.NodeExecutor.lambda$processGraphResponseFlux$14(NodeExecutor.java:475) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at reactor.core.publisher.FluxDefer.subscribe(FluxDefer.java:46) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.Flux.subscribe(Flux.java:8891) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxConcatArray$ConcatArraySubscriber.onComplete(FluxConcatArray.java:238) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxConcatArray.subscribe(FluxConcatArray.java:79) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.Flux.subscribe(Flux.java:8891) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxConcatArray$ConcatArraySubscriber.onComplete(FluxConcatArray.java:238) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxFilter$FilterSubscriber.onComplete(FluxFilter.java:166) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxMap$MapConditionalSubscriber.onComplete(FluxMap.java:275) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxConcatArray$ConcatArraySubscriber.onComplete(FluxConcatArray.java:209) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.Operators$MultiSubscriptionSubscriber.onComplete(Operators.java:2230) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxMap$MapSubscriber.onComplete(FluxMap.java:144) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxSwitchIfEmpty$SwitchIfEmptySubscriber.onComplete(FluxSwitchIfEmpty.java:85) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxFilter$FilterSubscriber.onComplete(FluxFilter.java:166) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxHandle$HandleConditionalSubscriber.onComplete(FluxHandle.java:440) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxMapFuseable$MapFuseableConditionalSubscriber.onComplete(FluxMapFuseable.java:350) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onComplete(FluxPeekFuseable.java:595) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onComplete(FluxPeekFuseable.java:595) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onComplete(FluxPeekFuseable.java:595) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onComplete(FluxPeekFuseable.java:595) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxHandleFuseable$HandleFuseableConditionalSubscriber.onComplete(FluxHandleFuseable.java:605) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onComplete(FluxContextWrite.java:126) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxDoFinally$DoFinallySubscriber.onComplete(FluxDoFinally.java:128) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onComplete(FluxPeekFuseable.java:940) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxMap$MapConditionalSubscriber.onComplete(FluxMap.java:275) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onComplete(FluxPeekFuseable.java:940) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onComplete(FluxPeekFuseable.java:940) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onComplete(FluxPeekFuseable.java:940) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onComplete(FluxPeekFuseable.java:940) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxHandle$HandleConditionalSubscriber.onComplete(FluxHandle.java:440) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onComplete(FluxContextWrite.java:126) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxDoFinally$DoFinallySubscriber.onComplete(FluxDoFinally.java:128) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onComplete(FluxPeekFuseable.java:595) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPublishOn$PublishOnConditionalSubscriber.doComplete(FluxPublishOn.java:1106) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPublishOn$PublishOnConditionalSubscriber.checkTerminated(FluxPublishOn.java:1140) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPublishOn$PublishOnConditionalSubscriber.runAsync(FluxPublishOn.java:996) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPublishOn$PublishOnConditionalSubscriber.run(FluxPublishOn.java:1079) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:84) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:37) ~[reactor-core-3.7.15.jar:3.7.15]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317) ~[na:na]
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) ~[na:na]
+	at java.base/java.lang.Thread.run(Thread.java:1570) ~[na:na]
+
+2026-02-10T22:09:37.422+08:00 ERROR 29112 --- [SAADemoApp] [nio-8888-exec-5] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed: org.springframework.ai.tool.execution.ToolExecutionException: Unrecognized token '����': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 13]] with root cause
+
+com.fasterxml.jackson.core.JsonParseException: Unrecognized token '����': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 13]
+	at com.fasterxml.jackson.core.JsonParser._constructError(JsonParser.java:2596) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.JsonParser._constructReadException(JsonParser.java:2622) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.JsonParser._constructReadException(JsonParser.java:2630) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.base.ParserMinimalBase._reportError(ParserMinimalBase.java:830) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.json.ReaderBasedJsonParser._reportInvalidToken(ReaderBasedJsonParser.java:3017) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.json.ReaderBasedJsonParser._handleOddValue(ReaderBasedJsonParser.java:2051) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.core.json.ReaderBasedJsonParser.nextFieldName(ReaderBasedJsonParser.java:1000) ~[jackson-core-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.deser.std.MapDeserializer._readAndBindStringKeyMap(MapDeserializer.java:596) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.deser.std.MapDeserializer.deserialize(MapDeserializer.java:450) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.deser.std.MapDeserializer.deserialize(MapDeserializer.java:31) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4979) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3895) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3878) ~[jackson-databind-2.19.4.jar:2.19.4]
+	at org.springframework.ai.util.json.JsonParser.fromJson(JsonParser.java:94) ~[spring-ai-model-1.1.2.jar:1.1.2]
+	at org.springframework.ai.tool.method.MethodToolCallback.extractToolArguments(MethodToolCallback.java:132) ~[spring-ai-model-1.1.2.jar:1.1.2]
+	at org.springframework.ai.tool.method.MethodToolCallback.call(MethodToolCallback.java:108) ~[spring-ai-model-1.1.2.jar:1.1.2]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeSyncTool(AgentToolNode.java:778) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeToolByType(AgentToolNode.java:649) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.lambda$executeToolCallWithInterceptors$4(AgentToolNode.java:569) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeToolCallWithInterceptors(AgentToolNode.java:577) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeToolCallWithInterceptors(AgentToolNode.java:511) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.executeToolCallsSequential(AgentToolNode.java:230) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.agent.node.AgentToolNode.apply(AgentToolNode.java:171) ~[spring-ai-alibaba-agent-framework-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.action.AsyncNodeActionWithConfig.lambda$node_async$0(AsyncNodeActionWithConfig.java:41) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.executor.NodeExecutor.executeNode(NodeExecutor.java:123) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.executor.NodeExecutor.execute(NodeExecutor.java:85) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.executor.MainGraphExecutor.execute(MainGraphExecutor.java:108) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at com.alibaba.cloud.ai.graph.executor.NodeExecutor.lambda$processGraphResponseFlux$14(NodeExecutor.java:475) ~[spring-ai-alibaba-graph-core-1.1.2.0.jar:1.1.2.0]
+	at reactor.core.publisher.FluxDefer.subscribe(FluxDefer.java:46) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.Flux.subscribe(Flux.java:8891) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxConcatArray$ConcatArraySubscriber.onComplete(FluxConcatArray.java:238) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxConcatArray.subscribe(FluxConcatArray.java:79) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.Flux.subscribe(Flux.java:8891) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxConcatArray$ConcatArraySubscriber.onComplete(FluxConcatArray.java:238) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxFilter$FilterSubscriber.onComplete(FluxFilter.java:166) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxMap$MapConditionalSubscriber.onComplete(FluxMap.java:275) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxConcatArray$ConcatArraySubscriber.onComplete(FluxConcatArray.java:209) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.Operators$MultiSubscriptionSubscriber.onComplete(Operators.java:2230) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxMap$MapSubscriber.onComplete(FluxMap.java:144) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxSwitchIfEmpty$SwitchIfEmptySubscriber.onComplete(FluxSwitchIfEmpty.java:85) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxFilter$FilterSubscriber.onComplete(FluxFilter.java:166) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxHandle$HandleConditionalSubscriber.onComplete(FluxHandle.java:440) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxMapFuseable$MapFuseableConditionalSubscriber.onComplete(FluxMapFuseable.java:350) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onComplete(FluxPeekFuseable.java:595) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onComplete(FluxPeekFuseable.java:595) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onComplete(FluxPeekFuseable.java:595) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onComplete(FluxPeekFuseable.java:595) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxHandleFuseable$HandleFuseableConditionalSubscriber.onComplete(FluxHandleFuseable.java:605) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onComplete(FluxContextWrite.java:126) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxDoFinally$DoFinallySubscriber.onComplete(FluxDoFinally.java:128) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onComplete(FluxPeekFuseable.java:940) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxMap$MapConditionalSubscriber.onComplete(FluxMap.java:275) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onComplete(FluxPeekFuseable.java:940) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onComplete(FluxPeekFuseable.java:940) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onComplete(FluxPeekFuseable.java:940) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onComplete(FluxPeekFuseable.java:940) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxHandle$HandleConditionalSubscriber.onComplete(FluxHandle.java:440) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onComplete(FluxContextWrite.java:126) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxDoFinally$DoFinallySubscriber.onComplete(FluxDoFinally.java:128) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.onComplete(FluxPeekFuseable.java:595) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPublishOn$PublishOnConditionalSubscriber.doComplete(FluxPublishOn.java:1106) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPublishOn$PublishOnConditionalSubscriber.checkTerminated(FluxPublishOn.java:1140) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPublishOn$PublishOnConditionalSubscriber.runAsync(FluxPublishOn.java:996) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.publisher.FluxPublishOn$PublishOnConditionalSubscriber.run(FluxPublishOn.java:1079) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:84) ~[reactor-core-3.7.15.jar:3.7.15]
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:37) ~[reactor-core-3.7.15.jar:3.7.15]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317) ~[na:na]
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) ~[na:na]
+	at java.base/java.lang.Thread.run(Thread.java:1570) ~[na:na]
+
+2026-02-10T22:09:37.452+08:00  WARN 29112 --- [SAADemoApp] [nio-8888-exec-5] .w.s.m.s.DefaultHandlerExceptionResolver : Ignoring exception, response committed already: org.springframework.http.converter.HttpMessageNotWritableException: No converter for [class java.util.LinkedHashMap] with preset Content-Type 'text/event-stream'
+2026-02-10T22:09:37.454+08:00  WARN 29112 --- [SAADemoApp] [nio-8888-exec-5] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotWritableException: No converter for [class java.util.LinkedHashMap] with preset Content-Type 'text/event-stream']
+2026-02-10T22:09:37.457+08:00  INFO 29112 --- [SAADemoApp] [nio-8888-exec-5] org.huang.saademo.manager.SSEManager     : SSE completed

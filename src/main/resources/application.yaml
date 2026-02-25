@@ -11,10 +11,13 @@ spring:
   ai:
     dashscope:
       api-key: ${qwenKey}
+    vectorstore:
+      pinecone:
+        api-key: ${PINECONE_API_KEY}
+        index-name: saademo
 
 apikey:
   qwenKey: ${qwenKey}
-
 
 server:
     port: 8888
