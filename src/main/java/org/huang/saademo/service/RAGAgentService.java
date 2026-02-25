@@ -1,9 +1,18 @@
 package org.huang.saademo.service;
 
+import com.alibaba.cloud.ai.dashscope.api.DashScopeApi;
+import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatModel;
+import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
+import com.alibaba.cloud.ai.graph.OverAllState;
+import com.alibaba.cloud.ai.graph.agent.ReactAgent;
+import com.alibaba.cloud.ai.graph.exception.GraphRunnerException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.huang.saademo.config.ApiKeyConfig;
+import org.huang.saademo.hook.RAGHook;
+import org.huang.saademo.tools.RAGTool;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.document.DocumentReader;
 import org.springframework.ai.reader.markdown.MarkdownDocumentReader;
@@ -20,6 +29,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -39,8 +49,40 @@ public class RAGAgentService {
     
     private ObjectMapper objectMapper = new ObjectMapper();
     
+    public OverAllState agentCall(String userInput){
+        ReactAgent agent = buildRAGAgent();
+        try {
+            Optional<OverAllState> allState = agent.invoke(userInput);
+            if(allState.isPresent()){
+                return allState.get();
+            } else {
+                log.warn("Agent execution completed but no output was produced.");
+                return null;
+            }
+        } catch (GraphRunnerException e) {
+            log.error("Error during agent execution: ", e);
+            throw new RuntimeException(e);
+        }
+    }
     
+    private ReactAgent buildRAGAgent(){
+        return ReactAgent.builder()
+                .name("RAGAgent")
+                .description("一个基于ReactAgent的RAG智能体，能够根据用户输入的问题，调用检索工具从向量数据库中获取相关内容，并结合大模型进行回答")
+                .instruction("你是一个智能助手。当需要查找信息时，使用工具。基于检索到的信息回答用户的问题，并引用相关片段。")
+                .model(buildChatModel())
+                .hooks(new RAGHook())
+                .methodTools(new RAGTool())
+                .build();
+    }
     
+    private ChatModel buildChatModel(){
+        DashScopeApi api = DashScopeApi.builder().apiKey(apiKeyConfig.getQwenKey()).build();
+        
+        DashScopeChatOptions options = DashScopeChatOptions.builder().model(MODEL_NAME).build();
+        
+        return DashScopeChatModel.builder().dashScopeApi(api).defaultOptions(options).build();
+    }
     
     /**
      * 将markdown文档中的内容添加到向量数据库中，一次性添加，后续可以增加增量添加的功能
