@@ -8,12 +8,16 @@ import com.alibaba.cloud.ai.graph.agent.hook.messages.MessagesModelHook;
 import com.alibaba.cloud.ai.graph.agent.hook.messages.UpdatePolicy;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.search.Expression;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.filter.Filter;
+import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.ai.vectorstore.pinecone.PineconeVectorStore;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -25,8 +29,12 @@ import java.util.stream.Collectors;
 @HookPositions(value = {HookPosition.BEFORE_MODEL}) // 指定该 Hook 在模型调用前执行
 public class RAGHook extends MessagesModelHook {
     
-    @Resource(name = "customPineconeVectorStore")
     private PineconeVectorStore vectorStore;
+    
+    @Autowired
+    public RAGHook(PineconeVectorStore vectorStore) {
+        this.vectorStore = vectorStore;
+    }
     
     @Override
     public AgentCommand beforeModel(List<Message> previousMessages, RunnableConfig config) {

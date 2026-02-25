@@ -43,7 +43,13 @@ public class RAGAgentService {
     @Resource(name = "customPineconeVectorStore")
     private PineconeVectorStore vectorStore;
     
-    private static final String MODEL_NAME = "qwen3.5-plus";
+    @Resource
+    private RAGHook ragHook;
+    
+    @Resource
+    private RAGTool ragTool;
+    
+    private static final String MODEL_NAME = "qwen3-max-2026-01-23";
     
     public record AgentOutput(String outputType, String agentName, String type, String text, Map<String, Object> metadata) {}
     
@@ -71,15 +77,16 @@ public class RAGAgentService {
                 .description("一个基于ReactAgent的RAG智能体，能够根据用户输入的问题，调用检索工具从向量数据库中获取相关内容，并结合大模型进行回答")
                 .instruction("你是一个智能助手。当需要查找信息时，使用工具。基于检索到的信息回答用户的问题，并引用相关片段。")
                 .model(buildChatModel())
-                .hooks(new RAGHook())
-                .methodTools(new RAGTool())
+                .hooks(ragHook)
+                .methodTools(ragTool)
                 .build();
     }
     
     private ChatModel buildChatModel(){
         DashScopeApi api = DashScopeApi.builder().apiKey(apiKeyConfig.getQwenKey()).build();
         
-        DashScopeChatOptions options = DashScopeChatOptions.builder().model(MODEL_NAME).build();
+        DashScopeChatOptions options =
+                DashScopeChatOptions.builder().model(MODEL_NAME).build();
         
         return DashScopeChatModel.builder().dashScopeApi(api).defaultOptions(options).build();
     }

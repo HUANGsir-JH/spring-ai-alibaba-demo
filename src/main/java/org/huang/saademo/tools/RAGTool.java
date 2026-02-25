@@ -2,11 +2,13 @@ package org.huang.saademo.tools;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
+import org.huang.saademo.hook.RAGHook;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.pinecone.PineconeVectorStore;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -14,8 +16,13 @@ import java.util.List;
 @Component
 public class RAGTool {
     
-    @Resource(name = "customPineconeVectorStore")
     private PineconeVectorStore vectorStore;
+    
+    @Autowired
+    public RAGTool(PineconeVectorStore vectorStore) {
+        this.vectorStore = vectorStore;
+    }
+
     
     private record SearchResult(boolean isSuccess, String content, String errorMsg) {}
     
@@ -37,32 +44,40 @@ public class RAGTool {
                 .similarityThreshold(scoreThreshold != null ? scoreThreshold : 0.8)
                 .build();
         
-        List<Document> documents = vectorStore.similaritySearch(request);
-        if(!documents.isEmpty()){
-            StringBuilder sb = new StringBuilder();
-            for (Document doc : documents) {
-                sb.append(doc.getText()).append("\n\n");
-            }
-            
-            SearchResult searchResult = new SearchResult(true, sb.toString(), null);
-            try {
-                return objectMapper.writeValueAsString(searchResult);
-            } catch (Exception e) {
-                SearchResult errorResult = new SearchResult(false, null, "序列化结果时发生错误: " + e.getMessage());
+        try{
+            List<Document> documents = vectorStore.similaritySearch(request);
+            if(!documents.isEmpty()){
+                StringBuilder sb = new StringBuilder();
+                for (Document doc : documents) {
+                    sb.append(doc.getText()).append("\n\n");
+                }
+                
+                SearchResult searchResult = new SearchResult(true, sb.toString(), null);
                 try {
-                    return objectMapper.writeValueAsString(errorResult);
-                } catch (Exception ex) {
-                    return "发生错误: " + ex.getMessage();
+                    return objectMapper.writeValueAsString(searchResult);
+                } catch (Exception e) {
+                    SearchResult errorResult = new SearchResult(false, null, "序列化结果时发生错误: " + e.getMessage());
+                    try {
+                        return objectMapper.writeValueAsString(errorResult);
+                    } catch (Exception ex) {
+                        return "发生错误: " + ex.getMessage();
+                    }
+                }
+            } else {
+                SearchResult searchResult = new SearchResult(false, null, "未找到相关内容");
+                try {
+                    return objectMapper.writeValueAsString(searchResult);
+                } catch (Exception e) {
+                    return "发生错误: " + e.getMessage();
                 }
             }
-        } else {
-            SearchResult searchResult = new SearchResult(false, null, "未找到相关内容");
+        } catch (Exception e) {
+            SearchResult searchResult = new SearchResult(false, null, "检索过程中发生错误: " + e.getMessage());
             try {
                 return objectMapper.writeValueAsString(searchResult);
-            } catch (Exception e) {
-                return "发生错误: " + e.getMessage();
+            } catch (Exception ex) {
+                return "发生错误: " + ex.getMessage();
             }
         }
-        
     }
 }
